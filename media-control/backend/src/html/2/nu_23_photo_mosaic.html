@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Photo Mosaic</title>
+    </head>
+    <style>
+        body {margin:0px}
+        div {margin-left:auto;margin-right:auto;display:table;position:relative;width:100%;overflow:hidden;padding-top:56.25%}
+        iframe {position:absolute;top:0;left:0;bottom:0;right:0;width:100%;height:100%;border:none}
+        .qr {position: absolute; bottom: -5px; left: -5px; height: 30%; width: auto; z-index: 100; border: 5px solid black;}
+    </style>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script>
+        setTimeout(() => {
+            // start a socket
+            var socket = io();
+
+            // get the screenId
+            const eventId = window.location.pathname.split('/')[3]
+            const screenUrl = window.location.pathname.split('/')[4]
+            const mediaUrl = window.location.pathname.split('/')[5]
+
+            const params = (new URL(window.location)).searchParams;
+            const screenName = params.get("name");
+
+            socket.on('connect', function () {
+                socket.emit('screen_connected', { eventId, screenUrl, mediaUrl, screenName });
+                socket.emit('unmute_spotify', { eventId, screenUrl })
+            });
+
+            // start a listening on the socket for changes in source
+            socket.on('update-source', function (data) {
+                // only update if we are the target screen
+                if (data.screen == screenUrl) {
+                    // simulate http redirect to same host and same screenId, but the new source path
+                    window.location.replace(`${window.location.origin}/api/v1/${eventId}/${screenUrl}/${data.media}?name=${screenName}`);
+                }
+            });
+        }, 1000);
+    </script>
+    <body>
+        <div className="container">
+            <iframe title="photomosaic" className="responsive-iframe" src="https://ocmvirtual.com/NUMosaic23"></iframe>
+            <img class="qr" src="https://static.event-media-control.com/misc/C23-300pxQRs-Photo-v1.png" alt="" />            
+        </div >
+    </body>
+</html>

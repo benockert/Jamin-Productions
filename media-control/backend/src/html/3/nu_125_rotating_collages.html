@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>NU125 - Rotating Collages</title>
+</head>
+<style>
+    body {
+        margin: 0px
+    }
+
+    div {
+        background: #0e0e0e;
+        height: 100%
+    }
+
+    img {
+        position: absolute;
+        width: 100%;
+        height: 100%
+    }
+
+</style>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    setTimeout(() => {
+        var socket = io();
+        // get the screenId
+        var eventId = window.location.pathname.split('/')[3]
+        var screenUrl = window.location.pathname.split('/')[4]
+        var mediaUrl = window.location.pathname.split('/')[5]
+        var loaded = true;
+
+        var params = (new URL(window.location)).searchParams;
+        var screenName = params.get("name");
+
+        socket.on('connect', function () {
+            socket.emit('screen_connected', { eventId, screenUrl, mediaUrl, screenName });
+            // socket.emit('unmute_spotify', { eventId, screenUrl })
+        });
+
+        // start a listening on the socket for changes in source
+        socket.on('update-source', function (data) {
+            // only update if we are the target screen
+            if (data.screen == screenUrl) {
+                // simulate http redirect to same host and same screenId, but the new source path
+                window.location.replace(`${window.location.origin}/api/v1/${eventId}/${screenUrl}/${data.media}?name=${screenName}`);
+            }
+        });
+    }, 1000);
+</script>
+<script type="text/javascript">
+    const rotating_info = [
+        "https://static.event-media-control.com/misc/nu_125_community.JPG",
+        "https://static.event-media-control.com/misc/nu_125_faculty_excellence.JPG",
+        "https://static.event-media-control.com/misc/nu_125_impact.JPG",
+        "https://static.event-media-control.com/misc/nu_125_innovation.JPG",
+    ]
+    let screen_idx = 0
+
+    function newSite() {
+        screen_idx += 1
+        var idx = screen_idx % rotating_info.length
+        document.getElementById("rotating_collage").src = rotating_info[idx]
+    }
+
+    setInterval(newSite, 16000);
+</script>
+
+<body>
+    <div>
+        <img id="rotating_collage" src="https://static.event-media-control.com/misc/nu_125_experience.JPG" alt=""/>
+    </div>
+</body>
+
+</html>

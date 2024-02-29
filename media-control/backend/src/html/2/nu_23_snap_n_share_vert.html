@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Snap N Share</title>
+</head>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    setTimeout(() => {
+        // start a socket
+        var socket = io();
+
+        // get the screenId
+        const eventId = window.location.pathname.split('/')[3]
+        const screenUrl = window.location.pathname.split('/')[4]
+        const mediaUrl = window.location.pathname.split('/')[5]
+
+        const params = (new URL(window.location)).searchParams;
+        const screenName = params.get("name");
+
+        socket.on('connect', function () {
+            socket.emit('screen_connected', { eventId, screenUrl, mediaUrl, screenName });
+            socket.emit('unmute_spotify', { eventId, screenUrl })
+        });
+
+        // start a listening on the socket for changes in source
+        socket.on('update-source', function (data) {
+            // only update if we are the target screen
+            if (data.screen == screenUrl) {
+                // simulate http redirect to same host and same screenId, but the new source path
+                window.location.replace(`${window.location.origin}/api/v1/${eventId}/${screenUrl}/${data.media}?name=${screenName}`);
+            }
+        });
+    }, 1000);
+</script>
+<style>
+    body {
+        margin: 0px
+    }
+
+    div {
+        background: #0e0e0e;
+        height: 100%
+    }
+
+    img {
+        position: absolute;
+        width: 100%;
+        height: 100%
+    }
+</style>
+
+<body>
+    <div>
+        <img src="https://static.event-media-control.com/media/C23-HHH-vertical-9x16-TVs-v1-SNAPnSHARE.png"
+            alt=""></img>
+    </div>
+</body>
+
+</html>

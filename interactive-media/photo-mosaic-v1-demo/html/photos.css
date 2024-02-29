@@ -1,0 +1,58 @@
+body {
+    margin: 0;
+    background-color: #000000;
+    overflow: hidden;
+}
+
+#canvas-1 {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+}
+
+.img-cover {
+    position: absolute;
+    z-index: 1;
+    box-shadow: inset 0.5px 0.5px 4px 3px rgba(255, 255, 255, 0.25);
+}
+
+.fade-in {
+    animation: fadeIn 1s;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+
+.popout-card {
+    z-index: 2;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: all 0.75s ease-out;
+    background-color: black; /*set dynamically*/
+}
+
+/* image */
+.popout-card-front {
+    z-index: 2;
+    backface-visibility: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* class applied to make scale*/
+.popout-card-scaled {
+    transform: scale(5);
+    box-shadow: 1px 1px 5px 2px rgba(102, 98, 98, 0.7);
+}

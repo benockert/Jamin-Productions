@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Pacman Leaderboard</title>
+</head>
+<style>
+    body {
+        margin: 0px;
+        overflow: hidden;
+    }
+
+    .qr {
+        position: absolute;
+        bottom: -4px;
+        left: -4px;
+        height: 23%;
+        width: auto;
+        z-index: 100;
+        border: 5px solid white;
+    }
+</style>
+
+<body>
+    <div id='gamification-widget'></div>
+    <script src='https://cdn-apps.cdn8.app/prod/widget/index.js' type='text/javascript'></script>
+    <script>
+        window.addEventListener('load', function () {
+            var widget = DigitaService.Widget.Create({
+                autoscroll: true,
+                element: 'gamification-widget',
+                engine: 'https://ocm.cdn8.app/4XCCGQfC/?l=1',
+                fixed: true,
+                height: ['100svh', '85vh'],
+                sharingurl: 'https://ocm.cdn8.app/4XCCGQfC/?l=1',
+                // width: '100%',
+            });
+            widget.load();
+        });
+    </script>
+    <img class="qr" src="https://static.event-media-control.com/misc/hungry_husky_qr.png" alt="" />
+</body>
+
+</html>

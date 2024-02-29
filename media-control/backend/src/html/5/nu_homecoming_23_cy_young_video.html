@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>NU Homecoming 2023 - Cy Young Video</title>
+</head>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    setTimeout(() => {
+        // start a socket
+        var socket = io();
+
+        // get the screenId
+        const eventId = window.location.pathname.split('/')[3]
+        const screenUrl = window.location.pathname.split('/')[4]
+        const mediaUrl = window.location.pathname.split('/')[5]
+
+        const params = (new URL(window.location)).searchParams;
+        const screenName = params.get("name");
+
+        socket.on('connect', function () {
+            socket.emit('screen_connected', { eventId, screenUrl, mediaUrl, screenName });
+            // socket.emit('mute_spotify', { eventId, screenUrl })
+        });
+
+        // start a listening on the socket for changes in source
+        socket.on('update-source', function (data) {
+            // only update if we are the target screen
+            if (data.screen == screenUrl) {
+                // simulate http redirect to same host and same screenId, but the new source path
+                window.location.replace(`${window.location.origin}/api/v1/${eventId}/${screenUrl}/${data.media}?name=${screenName}`);
+            }
+        });
+        
+        socket.on('reset-video', function(data) {
+            console.log("Received message to restart video")
+            if (data.screen = screenUrl) {
+                document.getElementsByTagName('video')[0].currentTime = 0;
+                document.getElementsByTagName('video')[0].play();
+            }
+        });
+
+        socket.on('play-video', function (data) {
+            console.log("Received message to play video")
+            if (data.screen = screenUrl) {
+                document.getElementsByTagName('video')[0].play();
+            }
+        });
+
+        socket.on('pause-video', function (data) {
+            console.log("Received message to pause video")
+            if (data.screen = screenUrl) {
+                document.getElementsByTagName('video')[0].pause();
+            }
+        });
+
+        socket.on('fullscreen-video', function (data) {
+            console.log("Received message to set video to full screen")
+            if (data.screen = screenUrl) {
+                document.getElementsByTagName('video')[0].requestFullscreen();
+            }
+        });
+
+
+        // const videoRequest = fetch("https://s3.amazonaws.com/static.event-media-control.com/videos/Video-storyboard-final-1080p.mp4", {mode: 'cors'}).then(resp => resp.blob({ type: "video/mp4", }));
+        // videoRequest.then(blob => {
+        //     console.log("download video")
+        //     console.log(blob.size)
+        //     console.log(blob.type)
+        //     document.getElementsByTagName('video')[0].src = window.URL.createObjectURL(blob);            
+        // });
+
+    }, 1000);
+</script>
+<style>
+    body {
+        overflow: hidden;
+        margin: 0px;
+        background-color: #000000;
+    }
+</style>
+
+<body>
+    <video id="auto-video" width="100%" width="100%" poster="https://static.event-media-control.com/media/cy_young_video.jpg" loop controls>
+        <source src="https://static.event-media-control.com/videos/Video-storyboard-final-1080p.mp4" type="video/mp4">
+    </video>
+</body>
+
+</html>

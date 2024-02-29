@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Manages resources for creating a staging bucket for interactive media content"
+Parameters:
+  BucketName:
+    Type: String
+    Description: Name for staging bucket
+    Default: jaminproductions-interactive-staging
+Resources:
+  StagingContentBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref BucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      CorsConfiguration:
+        CorsRules:
+          # todo remove all but put
+          - AllowedMethods:
+              - GET
+              - PUT
+              - HEAD
+              - POST
+              - DELETE
+            AllowedOrigins:
+              - "*"
+            AllowedHeaders:
+              - "*"
+      Tags:
+        - Key: "Category"
+          Value: "Jamin Productions"
+        - Key: "Type"
+          Value: "Interactive"
+  RekognitionRole: AmazonRekognitionFullAccess
+    AmazonS3ReadOnlyAccess
+  # StaticContentBucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   DependsOn:
+  #     - StagingContentBucket
+  #   Properties:
+  #     Bucket: !Ref StagingContentBucket
+  #     PolicyDocument:
+  #       Statement:
+  #         - Action:
+  #             - s3:PutObject
+  #           Effect: Allow
+  #           Resource:
+  #             !Join ["", ["arn:aws:s3:::", !Ref StagingContentBucket, "/*"]]
+  #           Principal:
+  #             Service: cloudfront.amazonaws.com
+  #           Condition:
+  #             StringEquals:
+  #               "AWS:SourceArn": !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${StaticSiteDistribution}

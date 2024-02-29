@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Manages resources for creating static.jaminproductions.com"
+Parameters:
+  DomainName:
+    Type: String
+    Description: Domain name for accessing s3 content
+    Default: static.jaminproductions.com
+  HostedZoneId:
+    Type: String
+    Description: Route53 hosted zone for jaminproductions.com
+    Default: Z04082273T7TZTO2XG3A9
+Resources:
+  StaticSiteAccessControlOrigin:
+    Type: AWS::CloudFront::OriginAccessControl
+    DependsOn: StaticContentBucket
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Join ["", [!Ref DomainName, ".s3.us-east-1.amazonaws.com"]]
+        Description: "Origin access control for static.jaminprodcutions.com"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+  StaticSiteDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn: StaticContentBucket
+    Properties:
+      DistributionConfig:
+        Comment: "Distribution for static 'Jamin Productions content"
+        Origins:
+          - DomainName:
+              !Join [
+                "",
+                [!Ref StaticContentBucket, ".s3.us-east-1.amazonaws.com"],
+              ]
+            Id: private-s3-static-content-bucket
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !GetAtt StaticSiteAccessControlOrigin.Id
+        Enabled: true
+        PriceClass: PriceClass_100
+        CNAMEs:
+          - static.jaminproductions.com
+        Aliases:
+          - static.jaminproductions.com
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - DELETE
+            - POST
+            - PUT
+            - OPTIONS
+            - PATCH
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          TargetOriginId: private-s3-static-content-bucket
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: b2884449-e4de-46a7-ac36-70bc7f1ddd6d
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf # S3OriginCors
+          # ResponseHeadersPolicyId: 5cc3b908-e619-4b99-88e5-2cf7f45965bd # ResponseCors
+        ViewerCertificate:
+          AcmCertificateArn: arn:aws:acm:us-east-1:783358359740:certificate/352b4616-b73c-4d83-acc4-0c8451383464
+          MinimumProtocolVersion: TLSv1.2_2021
+          SslSupportMethod: sni-only
+      Tags:
+        - Key: "Category"
+          Value: "Jamin Productions"
+        - Key: "Type"
+          Value: "Static content site"
+  StaticContentBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: !Ref DomainName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      CorsConfiguration:
+        CorsRules:
+          # todo remove all but put
+          - AllowedMethods:
+              - GET
+              - PUT
+              - HEAD
+              - POST
+              - DELETE
+            AllowedOrigins:
+              - "*"
+            AllowedHeaders:
+              - "*"
+      Tags:
+        - Key: "Category"
+          Value: "Jamin Productions"
+        - Key: "Type"
+          Value: "Static content site"
+  StaticContentBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    DependsOn:
+      - StaticSiteDistribution
+      - StaticContentBucket
+    Properties:
+      Bucket: !Ref StaticContentBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:GetObject
+              - s3:PutObject
+            Effect: Allow
+            Resource:
+              !Join ["", ["arn:aws:s3:::", !Ref StaticContentBucket, "/*"]]
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                "AWS:SourceArn": !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${StaticSiteDistribution}
+  SimpleRoutingRecords:
+    Type: AWS::Route53::RecordSetGroup
+    DependsOn: StaticSiteDistribution
+    Properties:
+      Comment: A name record for static.jaminproductions.com
+      HostedZoneId: !Ref HostedZoneId
+      RecordSets:
+        - Name: static.jaminproductions.com
+          AliasTarget:
+            HostedZoneId: Z2FDTNDATAQYW2 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordsetgroup-aliastarget.html
+            DNSName: !GetAtt StaticSiteDistribution.DomainName
+          Type: A

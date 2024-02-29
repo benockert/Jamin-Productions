@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Livestream</title>
+</head>
+<style>
+    body {
+        margin: 0px
+    }
+
+    div {
+        margin-left: auto;
+        margin-right: auto;
+        display: table;
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        padding-top: 56.25%
+    }
+
+    iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        border: none
+    }
+    .qr {position: absolute; top: -5px; right: -5px; height: 25%; width: auto; z-index: 100; border: 5px solid black;}
+</style>
+
+<body>
+    <div className="container">
+        <iframe id="ls_embed_1682339288"
+            src="https://livestream.com/accounts/9010826/events/10841369/player?width=640&amp;height=360&amp;enableInfoAndActivity=true&amp;defaultDrawer=&amp;autoPlay=true&amp;mute=false"
+            width="640" height="360" frameborder="0" scrolling="no" autoPlay={true} allow="autoplay;" allowfullscreen> </iframe>
+        <script type="text/javascript" data-embed_id="ls_embed_1682339288"
+            src="https://livestream.com/assets/plugins/referrer_tracking.js"></script>
+        <img class="qr" src="https://static.event-media-control.com/misc/C23-300pxQRs-Program-v1.png" alt="" />
+    </div>
+</body>
+
+</html>

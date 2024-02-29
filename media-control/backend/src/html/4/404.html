@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>NU125 - Rotating Collages</title>
+</head>
+<style>
+    body {
+        margin: 0px
+    }
+
+    div {
+        margin-left: auto;
+        margin-right: auto;
+        display: table;
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        padding-top: 56.25%
+    }
+
+    .qr {
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        height: 300px;
+        width: auto;
+        z-index: 100
+    }
+</style>
+<script type="text/javascript">
+    const rotating_info = [
+        "https://static.event-media-control.com/misc/nu_125_community.JPG",
+        "https://static.event-media-control.com/misc/nu_125_faculty_excellence.JPG",
+        "https://static.event-media-control.com/misc/nu_125_impact.JPG",
+        "https://static.event-media-control.com/misc/nu_125_innovation.JPG",
+    ]
+    let screen_idx = 0
+
+    function newSite() {
+        screen_idx += 1
+        var idx = screen_idx % rotating_info.length
+        document.getElementById("rotating_collage").src = rotating_info[idx]
+    }
+
+    setInterval(newSite, 30000);
+</script>
+
+<body>
+    <div className="container">
+        <iframe id="rotating_collage" title="rotating_info"
+            src="https://static.event-media-control.com/misc/nu_125_experience.JPG"></iframe>
+    </div>
+</body>
+
+</html>

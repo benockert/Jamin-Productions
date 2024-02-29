@@ -1,0 +1,146 @@
+service: requests-form-backend # todo: update to generic forms handler
+frameworkVersion: "3"
+
+custom:
+  deploymentBucketName: "serverless-deployment-fghjkl389xc7a"
+  interactiveMediaTableName: "interactive-media-form-submission-${sls:stage}"
+  requestsTableName: "song-requests-form-submission-${sls:stage}"
+  eventsTableName: "jamin-productions-events-${sls:stage}"
+  spotifyAuthTableName: "requests-spotify-auth"
+  stackName: "song-requests-backend-stack-${sls:stage}"
+  staticBucketName: "static.jaminproductions.com"
+  staticBucketRegion: "us-east-1"
+  staticBucketArn: arn:aws:s3:::static.jaminproductions.com
+  spotifyAuthTableArn: arn:aws:dynamodb:us-west-2:783358359740:table/requests-spotify-auth
+
+provider:
+  name: aws
+  stage: dev
+  region: us-west-2
+  stackName: ${self:custom.stackName}
+  runtime: nodejs18.x
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
+    maxPreviousDeploymentArtifacts: 10
+    versioning: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:BatchGetItem
+            - dynamodb:BatchWriteItem
+            - dynamodb:ConditionCheckItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - s3:PutObject
+            - s3:GetObject
+          Resource:
+            - Fn::GetAtt: [RequestsTable, Arn]
+            - Fn::GetAtt: [EventsTable, Arn]
+            - Fn::GetAtt: [InteractiveMediaTable, Arn]
+            - ${self:custom.spotifyAuthTableArn}
+            - ${self:custom.staticBucketArn}/*
+  environment:
+    REQUESTS_TABLE: ${self:custom.requestsTableName}
+    EVENTS_TABLE: ${self:custom.eventsTableName}
+    INTERACTIVE_MEDIA_TABLE: ${self:custom.interactiveMediaTableName}
+    SPOTIFY_AUTH_TABLE: ${self:custom.spotifyAuthTableName}
+    SPOTIFY_CLIENT_ID: ${ssm:jamin-productions-spotify-app-client-id}
+    SPOTIFY_CLIENT_SECRET: ${ssm:jamin-productions-spotify-app-client-secret}
+    STATIC_CONTENT_BUCKET: ${self:custom.staticBucketName}
+    STATIC_BUCKET_REGION: ${self:custom.staticBucketRegion}
+    CONTENT_STAGING_BUCKET:
+    UPLOAD_URL_EXPIRATION_SECONDS: 60
+    APP_STAGE: ${sls:stage}
+  httpApi:
+    cors: true
+
+functions:
+  handleRequests:
+    memorySize: 512
+    timeout: 10
+    name: song-requests-form-handler-${sls:stage}
+    description: "Handler for song request form submissions"
+    handler: Requests/index.handler
+    events:
+      - httpApi: "GET /events/{eventId}"
+      - httpApi: "GET /requests/{eventId}"
+      - httpApi: "POST /requests/{eventId}"
+    # role:
+  handleInteractiveMediaSubmissions:
+    memorySize: 512
+    timeout: 10
+    name: interactive-media-form-handler-${sls:stage}
+    description: "Handler for media submissions"
+    handler: InteractiveMedia/index.handler
+    events:
+      - httpApi: "POST /media/{eventId}/photo_mosaic"
+    # role:
+  handleSpotifyIntegration:
+    memorySize: 512
+    timeout: 10
+    name: requests-spotify-integration-${sls:stage}
+    description: "Handler for adding requested songs to spotify playlists"
+    handler: Spotify/index.handler
+    events:
+      - httpApi: "*"
+    # role:
+
+resources:
+  Resources:
+    RequestsTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: event_name
+            AttributeType: S
+          - AttributeName: submission_timestamp
+            AttributeType: N
+        KeySchema:
+          - AttributeName: event_name
+            KeyType: HASH
+          - AttributeName: submission_timestamp
+            KeyType: RANGE
+        TableName: ${self:custom.requestsTableName}
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    EventsTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: event_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: event_id
+            KeyType: HASH
+        TableName: ${self:custom.eventsTableName}
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    InteractiveMediaTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: event_name
+            AttributeType: S
+          - AttributeName: submission_timestamp
+            AttributeType: N
+        KeySchema:
+          - AttributeName: event_name
+            KeyType: HASH
+          - AttributeName: submission_timestamp
+            KeyType: RANGE
+        TableName: ${self:custom.interactiveMediaTableName}
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
