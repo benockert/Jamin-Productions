@@ -19,8 +19,14 @@ app.use(express.json());
 app.use(express.urlencoded()); // needed to handle form-data submissions
 
 app.use((req, res, next) => {
-  console.log("New request at time:", Date.now(), "to path", req.path);
-  console.log("Request body:", req.body);
+  console.log(
+    "New request at time:",
+    Date.now(),
+    "to path",
+    req.path,
+    "Request body:",
+    req.body
+  );
 
   // call so continues to routes
   next();

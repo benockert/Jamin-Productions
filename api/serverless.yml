@@ -10,13 +10,14 @@ custom:
   stackName: "song-requests-backend-stack-${sls:stage}"
   staticBucketName: "static.jaminproductions.com"
   staticBucketRegion: "us-east-1"
-  staticBucketArn: arn:aws:s3:::static.jaminproductions.com
-  spotifyAuthTableArn: arn:aws:dynamodb:us-west-2:783358359740:table/requests-spotify-auth
+  staticBucketArn: "arn:aws:s3:::static.jaminproductions.com"
+  spotifyAuthTableArn: "arn:aws:dynamodb:us-west-2:783358359740:table/requests-spotify-auth"
+  spotifyAppName: "Jamin Productions"
 
 provider:
   name: aws
-  stage: dev
-  region: us-west-2
+  stage: dev # use --stage {stage_name} to override during deploy
+  region: us-west-2 # use --region {region_name} to override during deploy
   stackName: ${self:custom.stackName}
   runtime: nodejs18.x
   deploymentBucket:
@@ -50,12 +51,12 @@ provider:
     REQUESTS_TABLE: ${self:custom.requestsTableName}
     EVENTS_TABLE: ${self:custom.eventsTableName}
     INTERACTIVE_MEDIA_TABLE: ${self:custom.interactiveMediaTableName}
+    SPOTIFY_APP_NAME: ${self:custom.spotifyAppName}
     SPOTIFY_AUTH_TABLE: ${self:custom.spotifyAuthTableName}
     SPOTIFY_CLIENT_ID: ${ssm:jamin-productions-spotify-app-client-id}
     SPOTIFY_CLIENT_SECRET: ${ssm:jamin-productions-spotify-app-client-secret}
     STATIC_CONTENT_BUCKET: ${self:custom.staticBucketName}
     STATIC_BUCKET_REGION: ${self:custom.staticBucketRegion}
-    CONTENT_STAGING_BUCKET:
     UPLOAD_URL_EXPIRATION_SECONDS: 60
     APP_STAGE: ${sls:stage}
   httpApi:
@@ -93,11 +94,23 @@ functions:
     # role:
 
 resources:
+  Conditions:
+    IsUsWest2: !Equals [!Ref AWS::Region, us-west-2]
+    IsProd:
+      Fn::Equals:
+        - ${sls:stage}
+        - prod
+    CreateSpotifyAuthTable: !And [!Condition IsUsWest2, !Condition IsProd]
   Resources:
     RequestsTable:
-      Type: AWS::DynamoDB::Table
+      Type: AWS::DynamoDB::GlobalTable
       DeletionPolicy: Retain
+      Condition: IsUsWest2
       Properties:
+        BillingMode: PAY_PER_REQUEST
+        Replicas:
+          - Region: us-east-1
+          - Region: us-west-2
         AttributeDefinitions:
           - AttributeName: event_name
             AttributeType: S
@@ -109,13 +122,17 @@ resources:
           - AttributeName: submission_timestamp
             KeyType: RANGE
         TableName: ${self:custom.requestsTableName}
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: KEYS_ONLY
     EventsTable:
-      Type: AWS::DynamoDB::Table
+      Type: AWS::DynamoDB::GlobalTable
       DeletionPolicy: Retain
+      Condition: IsUsWest2
       Properties:
+        BillingMode: PAY_PER_REQUEST
+        Replicas:
+          - Region: us-east-1
+          - Region: us-west-2
         AttributeDefinitions:
           - AttributeName: event_id
             AttributeType: S
@@ -123,13 +140,17 @@ resources:
           - AttributeName: event_id
             KeyType: HASH
         TableName: ${self:custom.eventsTableName}
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        StreamSpecification:
+          StreamViewType: KEYS_ONLY
     InteractiveMediaTable:
-      Type: AWS::DynamoDB::Table
+      Type: AWS::DynamoDB::GlobalTable
       DeletionPolicy: Retain
+      Condition: IsUsWest2
       Properties:
+        BillingMode: PAY_PER_REQUEST
+        Replicas:
+          - Region: us-east-1
+          - Region: us-west-2
         AttributeDefinitions:
           - AttributeName: event_name
             AttributeType: S
@@ -141,6 +162,32 @@ resources:
           - AttributeName: submission_timestamp
             KeyType: RANGE
         TableName: ${self:custom.interactiveMediaTableName}
+        StreamSpecification:
+          StreamViewType: KEYS_ONLY
+    SpotifyAuthTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Condition: CreateSpotifyAuthTable
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: app_name
+            AttributeType: S
+          - AttributeName: flow_type
+            AttributeType: S
+        KeySchema:
+          - AttributeName: app_name
+            KeyType: HASH
+          - AttributeName: flow_type
+            KeyType: RANGE
+        TableName: ${self:custom.spotifyAuthTableName}
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+
+  Outputs:
+    InteractiveMediaTableArn:
+      Description: ARN of the interactive media DDB table
+      Value:
+        Fn::GetAtt: [InteractiveMediaTable, Arn]
+      Export:
+        Name: !Sub "${AWS::StackName}-InteractiveMediaTableArn"

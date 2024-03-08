@@ -1,0 +1,7 @@
+# repo wide
+node_modules/
+.serverless/
+package-lock.json
+
+# relative paths
+misc/scripts/files/

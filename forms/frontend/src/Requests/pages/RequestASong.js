@@ -30,7 +30,8 @@ export async function requestASongPageLoader({ params, request }) {
 
 const localStorageAccessDenied =
   "Unable to access local storage to retrieve request count.";
-const requestLimitReachedMessage = "Your request limit has been reached.";
+const requestLimitReachedMessage =
+  "Your request limit has been reached. Thank you!";
 
 function RequestASong() {
   const { eventId } = useParams();
@@ -71,7 +72,7 @@ function RequestASong() {
   const RequestsRemainingText = (count) => {
     if (limitEnforced) {
       const requestsRemaining = eventInfo.requestLimit - count;
-      return ` You have ${requestsRemaining} request${
+      return ` You have ${requestsRemaining} song request${
         requestsRemaining - 1 ? "s" : ""
       } remaining.`;
     } else {

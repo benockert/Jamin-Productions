@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Manages resources for storing miscellaneous code packages for consumption by Lambda functions"
+Resources:
+  CodeBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName: jamin-productions-misc-code
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: "Category"
+          Value: "Jamin Productions"
+        - Key: "Type"
+          Value: "Misc code packages"
+Outputs:
+  CodeBucketName:
+    Description: Name of the code packages S3 bucket
+    Value: CodeBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-JPCodeBucketName"
+  CodeBucketArn:
+    Description: Arn identifier of the code packages S3 bucket
+    Value: !GetAtt CodeBucket.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-JPCodeBucketArn"

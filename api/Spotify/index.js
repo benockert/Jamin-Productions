@@ -87,6 +87,7 @@ const getAccessToken = async (next, req, res) => {
   const params = {
     TableName: process.env.SPOTIFY_AUTH_TABLE,
     Key: {
+      app_name: process.env.SPOTIFY_APP_NAME,
       flow_type: "authorization_code",
     },
   };
@@ -159,6 +160,7 @@ const updateAccessToken = async ({
   const params = {
     TableName: process.env.SPOTIFY_AUTH_TABLE,
     Item: {
+      app_name: process.env.SPOTIFY_APP_NAME,
       flow_type: "authorization_code",
       access_token: access_token,
       refresh_token: refresh_token,

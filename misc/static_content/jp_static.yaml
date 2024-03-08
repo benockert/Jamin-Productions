@@ -128,3 +128,14 @@ Resources:
             HostedZoneId: Z2FDTNDATAQYW2 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordsetgroup-aliastarget.html
             DNSName: !GetAtt StaticSiteDistribution.DomainName
           Type: A
+Outputs:
+  StaticBucketName:
+    Description: Name of the static content S3 bucket
+    Value: !Ref StaticContentBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-StaticBucketName"
+  StaticBucketArn:
+    Description: Arn identifier of the static content S3 bucket
+    Value: !GetAtt StaticContentBucket.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-StaticBucketArn"
