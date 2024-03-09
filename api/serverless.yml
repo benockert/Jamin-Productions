@@ -106,7 +106,7 @@ functions:
     timeout: 10
     name: song-requests-form-handler-${sls:stage}
     description: "Handler for song request form submissions"
-    handler: Requests/index.handler
+    handler: src/Requests/index.handler
     events:
       - httpApi: "GET /events/{eventId}"
       - httpApi: "GET /requests/{eventId}"
@@ -117,7 +117,7 @@ functions:
     timeout: 10
     name: interactive-media-form-handler-${sls:stage}
     description: "Handler for media submissions"
-    handler: InteractiveMedia/index.handler
+    handler: src/InteractiveMedia/index.handler
     events:
       - httpApi: "POST /media/{eventId}/photo_mosaic"
     # role:
@@ -126,7 +126,7 @@ functions:
     timeout: 10
     name: requests-spotify-integration-${sls:stage}
     description: "Handler for adding requested songs to spotify playlists"
-    handler: Spotify/index.handler
+    handler: src/Spotify/index.handler
     events:
       - httpApi: "*"
     # role:
