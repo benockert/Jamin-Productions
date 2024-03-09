@@ -1,5 +1,11 @@
-service: jamin-productions-backend # todo: update to generic forms handler
+service: jamin-productions-backend
 frameworkVersion: "3"
+
+package:
+  individually: false # to help avoid EMFILE: too many open files error, in addition to moving dev dependencies
+
+plugins:
+  - serverless-domain-manager
 
 custom:
   deploymentBucketName: "jaminproductions.serverless.${opt:region, self:provider.region}.deploys"
@@ -11,6 +17,36 @@ custom:
   staticBucketName: "static.jaminproductions.com"
   staticBucketRegion: "us-east-1"
   spotifyAppName: "Jamin Productions"
+
+  # for route 53 domain and latency routing
+  certificateName: jaminproductions.com
+  regionalApiDomain: api-${opt:region, self:provider.region}.${self:custom.certificateName}
+  apiDomain: api.${self:custom.certificateName}
+  customDomains:
+    # api.jaminproductions.com/{stage}
+    - http:
+        certificateName: "${self:custom.certificateName}"
+        domainName: ${self:custom.apiDomain}
+        basePath: ""
+        stage: "$default"
+        endpointType: "regional"
+        createRoute53Record: true
+        securityPolicy: tls_1_2
+        route53Params:
+          routingPolicy: latency
+        autoDomain: true
+    # api.{region}.jaminproductions.com/{stage}
+    - http:
+        certificateName: "${self:custom.certificateName}"
+        domainName: ${self:custom.regionalApiDomain}
+        basePath: ""
+        stage: "$default"
+        endpointType: "regional"
+        createRoute53Record: true
+        securityPolicy: tls_1_2
+        route53Params:
+          routingPolicy: latency
+        autoDomain: true
 
 provider:
   name: aws
@@ -42,6 +78,7 @@ provider:
             - s3:PutObject
             - s3:GetObject
           Resource:
+            # replace with - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
             - !Join [
                 "",
                 [
@@ -98,6 +135,7 @@ provider:
     UPLOAD_URL_EXPIRATION_SECONDS: 60
     APP_STAGE: ${sls:stage}
   httpApi:
+    metrics: true
     cors: true
 
 functions:
