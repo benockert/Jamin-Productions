@@ -84,15 +84,23 @@ def csv_to_ddb(ddb, csv_filename, ddb_tablename):
     assert(len(items_to_write) == 0)
 
 def main():
-    ddb = boto3.client('dynamodb', config=Config(region_name="us-west-2"))
+    ddb = boto3.client('dynamodb', config=Config(region_name="us-east-1"))
 
     # events_file = "./files/events.csv"
     # events_table = "jamin-productions-events-dev"
     # csv_to_ddb(ddb, events_file, events_table)
 
     # requests_file = "./files/requests.csv"
-    # requests_table = "song-requests-form-submission-prod"
+    # requests_table = "song-requests-form-submission-dev"
     # csv_to_ddb(ddb, requests_file, requests_table)
+
+    events_file = "./files/events.csv"
+    events_table = "jamin-productions-events-prod"
+    csv_to_ddb(ddb, events_file, events_table)
+
+    requests_file = "./files/requests.csv"
+    requests_table = "song-requests-form-submission-prod"
+    csv_to_ddb(ddb, requests_file, requests_table)
 
     spotify_file = "./files/spotify_auth.csv"
     spotify_table = "requests-spotify-auth"

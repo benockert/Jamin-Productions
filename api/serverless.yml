@@ -1,25 +1,25 @@
-service: requests-form-backend # todo: update to generic forms handler
+service: jamin-productions-backend # todo: update to generic forms handler
 frameworkVersion: "3"
 
 custom:
-  deploymentBucketName: "serverless-deployment-fghjkl389xc7a"
+  deploymentBucketName: "jaminproductions.serverless.${opt:region, self:provider.region}.deploys"
   interactiveMediaTableName: "interactive-media-form-submission-${sls:stage}"
   requestsTableName: "song-requests-form-submission-${sls:stage}"
   eventsTableName: "jamin-productions-events-${sls:stage}"
   spotifyAuthTableName: "requests-spotify-auth"
-  stackName: "song-requests-backend-stack-${sls:stage}"
+  stackName: "jamin-productions-api-backend-stack-${sls:stage}"
   staticBucketName: "static.jaminproductions.com"
   staticBucketRegion: "us-east-1"
-  staticBucketArn: "arn:aws:s3:::static.jaminproductions.com"
-  spotifyAuthTableArn: "arn:aws:dynamodb:us-west-2:783358359740:table/requests-spotify-auth"
   spotifyAppName: "Jamin Productions"
 
 provider:
   name: aws
   stage: dev # use --stage {stage_name} to override during deploy
-  region: us-west-2 # use --region {region_name} to override during deploy
+  region: us-east-1 # use --region {region_name} to override during deploy, new regions will need SSM params
   stackName: ${self:custom.stackName}
   runtime: nodejs18.x
+  stackTags:
+    AppManagerCFNStackKey: "Jamin-Productions-serverless-${sls:stage}" # to enable Application Manager cost tracking
   deploymentBucket:
     name: ${self:custom.deploymentBucketName}
     maxPreviousDeploymentArtifacts: 10
@@ -42,11 +42,49 @@ provider:
             - s3:PutObject
             - s3:GetObject
           Resource:
-            - Fn::GetAtt: [RequestsTable, Arn]
-            - Fn::GetAtt: [EventsTable, Arn]
-            - Fn::GetAtt: [InteractiveMediaTable, Arn]
-            - ${self:custom.spotifyAuthTableArn}
-            - ${self:custom.staticBucketArn}/*
+            - !Join [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  !Ref AWS::Region,
+                  ":",
+                  !Ref AWS::AccountId,
+                  ":table/",
+                  "${self:custom.requestsTableName}",
+                ],
+              ] # need to manuallty construct Arn for global table and multi-region stack
+            - !Join [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  !Ref AWS::Region,
+                  ":",
+                  !Ref AWS::AccountId,
+                  ":table/",
+                  "${self:custom.eventsTableName}",
+                ],
+              ]
+            - !Join [
+                "",
+                [
+                  "arn:aws:dynamodb:",
+                  !Ref AWS::Region,
+                  ":",
+                  !Ref AWS::AccountId,
+                  ":table/",
+                  "${self:custom.interactiveMediaTableName}",
+                ],
+              ]
+            - !Join [
+                "",
+                [
+                  "arn:aws:dynamodb:us-east-1:",
+                  !Ref AWS::AccountId,
+                  ":table/",
+                  "${self:custom.requestsTableName}",
+                ],
+              ]
+            - !Join ["", ["arn:aws:s3:::", "${self:custom.staticBucketName}/*"]]
   environment:
     REQUESTS_TABLE: ${self:custom.requestsTableName}
     EVENTS_TABLE: ${self:custom.eventsTableName}
@@ -95,17 +133,17 @@ functions:
 
 resources:
   Conditions:
-    IsUsWest2: !Equals [!Ref AWS::Region, us-west-2]
+    IsUsEast1: !Equals [!Ref AWS::Region, us-east-1]
     IsProd:
       Fn::Equals:
         - ${sls:stage}
         - prod
-    CreateSpotifyAuthTable: !And [!Condition IsUsWest2, !Condition IsProd]
+    CreateSpotifyAuthTable: !And [!Condition IsUsEast1, !Condition IsProd]
   Resources:
     RequestsTable:
       Type: AWS::DynamoDB::GlobalTable
       DeletionPolicy: Retain
-      Condition: IsUsWest2
+      Condition: IsUsEast1
       Properties:
         BillingMode: PAY_PER_REQUEST
         Replicas:
@@ -127,7 +165,7 @@ resources:
     EventsTable:
       Type: AWS::DynamoDB::GlobalTable
       DeletionPolicy: Retain
-      Condition: IsUsWest2
+      Condition: IsUsEast1
       Properties:
         BillingMode: PAY_PER_REQUEST
         Replicas:
@@ -145,7 +183,7 @@ resources:
     InteractiveMediaTable:
       Type: AWS::DynamoDB::GlobalTable
       DeletionPolicy: Retain
-      Condition: IsUsWest2
+      Condition: IsUsEast1
       Properties:
         BillingMode: PAY_PER_REQUEST
         Replicas:
@@ -188,6 +226,17 @@ resources:
     InteractiveMediaTableArn:
       Description: ARN of the interactive media DDB table
       Value:
-        Fn::GetAtt: [InteractiveMediaTable, Arn]
+        Fn::Join:
+          [
+            "",
+            [
+              "arn:aws:dynamodb:",
+              !Ref AWS::Region,
+              ":",
+              !Ref AWS::AccountId,
+              ":table/",
+              "${self:custom.interactiveMediaTableName}",
+            ],
+          ]
       Export:
         Name: !Sub "${AWS::StackName}-InteractiveMediaTableArn"
