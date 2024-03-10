@@ -153,36 +153,14 @@ app.post("/requests/:eventId", async function (req, res) {
         },
       };
 
-      // =========================================
-      // add to spotify
-      // todo: remove in favor of frontend sending
-      try {
-        console.log("SUBMITTING TO PLAYLIST");
-        request.post({
-          headers: { "content-type": "application/json" },
-          url: `https://t5cm4v4fol.execute-api.us-west-2.amazonaws.com/spotify/${eventId}/add_to_playlist`,
-          body: {
-            songTitle: songTitle,
-            artistName: artistName,
-          },
-          json: true,
-        });
-      } catch (error) {
-        console.log({ error });
-      }
-      // =====================================
-
-      // todo: remove set timeout when above is removed
-      setTimeout(async () => {
-        console.log("Submitting Put request:", params);
-        await dynamoDbClient.send(new PutCommand(params));
-        res.status(200).json({
-          result: "success",
-          message: `Thank you for your request${
-            requestorName == "" ? "!" : `, ${requestorName.split(" ")[0]}!`
-          }`,
-        });
-      }, "500");
+      console.log("Submitting Put request:", params);
+      await dynamoDbClient.send(new PutCommand(params));
+      res.status(200).json({
+        result: "success",
+        message: `Thank you for your request${
+          requestorName == "" ? "!" : `, ${requestorName.split(" ")[0]}!`
+        }`,
+      });
     }
   } catch (error) {
     console.log(error);
