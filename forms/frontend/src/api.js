@@ -1,7 +1,7 @@
 const API_URL =
   process.env.NODE_ENV === "production"
-    ? "https://t5cm4v4fol.execute-api.us-west-2.amazonaws.com/"
-    : "https://yozv3qlx9a.execute-api.us-west-2.amazonaws.com/";
+    ? "https://api.jaminproductions.com/"
+    : "https://pm0v1kb80m.execute-api.us-west-2.amazonaws.com/"; // https://hb222ae3qg.execute-api.us-east-1.amazonaws.com/
 
 export async function postData(path, data = {}) {
   try {

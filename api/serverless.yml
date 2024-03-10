@@ -1,3 +1,9 @@
+# This template manages backend resources for the 'Jamin Productions api, both prod and dev, including:
+#   - API gateway endpoints
+#   - Lambda handlers for each endpoint
+#   - Dynamo DB tables (global and regional)
+#   - Custom domains (prod only) mapped to regional latency routes
+
 service: jamin-productions-backend
 frameworkVersion: "3"
 
@@ -19,6 +25,9 @@ custom:
   spotifyAppName: "Jamin Productions"
 
   # for route 53 domain and latency routing
+  customDomainsEnabled:
+    dev: false
+    prod: true
   certificateName: jaminproductions.com
   regionalApiDomain: api-${opt:region, self:provider.region}.${self:custom.certificateName}
   apiDomain: api.${self:custom.certificateName}
@@ -28,25 +37,25 @@ custom:
         certificateName: "${self:custom.certificateName}"
         domainName: ${self:custom.apiDomain}
         basePath: ""
-        stage: "$default"
         endpointType: "regional"
         createRoute53Record: true
         securityPolicy: tls_1_2
         route53Params:
           routingPolicy: latency
-        autoDomain: true
+        autoDomain: true # so gets included in severless deploy
+        enabled: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
     # api.{region}.jaminproductions.com/{stage}
     - http:
         certificateName: "${self:custom.certificateName}"
         domainName: ${self:custom.regionalApiDomain}
         basePath: ""
-        stage: "$default"
         endpointType: "regional"
         createRoute53Record: true
         securityPolicy: tls_1_2
         route53Params:
           routingPolicy: latency
         autoDomain: true
+        enabled: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
 
 provider:
   name: aws
@@ -78,50 +87,11 @@ provider:
             - s3:PutObject
             - s3:GetObject
           Resource:
-            # replace with - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
-            - !Join [
-                "",
-                [
-                  "arn:aws:dynamodb:",
-                  !Ref AWS::Region,
-                  ":",
-                  !Ref AWS::AccountId,
-                  ":table/",
-                  "${self:custom.requestsTableName}",
-                ],
-              ] # need to manuallty construct Arn for global table and multi-region stack
-            - !Join [
-                "",
-                [
-                  "arn:aws:dynamodb:",
-                  !Ref AWS::Region,
-                  ":",
-                  !Ref AWS::AccountId,
-                  ":table/",
-                  "${self:custom.eventsTableName}",
-                ],
-              ]
-            - !Join [
-                "",
-                [
-                  "arn:aws:dynamodb:",
-                  !Ref AWS::Region,
-                  ":",
-                  !Ref AWS::AccountId,
-                  ":table/",
-                  "${self:custom.interactiveMediaTableName}",
-                ],
-              ]
-            - !Join [
-                "",
-                [
-                  "arn:aws:dynamodb:us-east-1:",
-                  !Ref AWS::AccountId,
-                  ":table/",
-                  "${self:custom.requestsTableName}",
-                ],
-              ]
-            - !Join ["", ["arn:aws:s3:::", "${self:custom.staticBucketName}/*"]]
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.eventsTableName}"
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.interactiveMediaTableName}"
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:custom.requestsTableName}"
+            - "arn:aws:dynamodb:us-east-1:*:table/${self:custom.spotifyAuthTableName}"
+            - "arn:aws:s3:::${self:custom.staticBucketName}/*"
   environment:
     REQUESTS_TABLE: ${self:custom.requestsTableName}
     EVENTS_TABLE: ${self:custom.eventsTableName}
@@ -137,6 +107,7 @@ provider:
   httpApi:
     metrics: true
     cors: true
+    disableDefaultEndpoint: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
 
 functions:
   handleRequests:
@@ -259,7 +230,6 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-
   Outputs:
     InteractiveMediaTableArn:
       Description: ARN of the interactive media DDB table
