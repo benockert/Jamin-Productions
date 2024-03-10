@@ -15,31 +15,24 @@ Resources:
     DependsOn: StaticContentBucket
     Properties:
       OriginAccessControlConfig:
-        Name: !Join ["", [!Ref DomainName, ".s3.us-east-1.amazonaws.com"]]
+        Name: !Sub "${DomainName}.s3.us-east-1.amazonaws.com"
         Description: "Origin access control for static.jaminprodcutions.com"
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
   StaticSiteDistribution:
     Type: AWS::CloudFront::Distribution
-    DependsOn: StaticContentBucket
     Properties:
       DistributionConfig:
         Comment: "Distribution for static 'Jamin Productions content"
         Origins:
-          - DomainName:
-              !Join [
-                "",
-                [!Ref StaticContentBucket, ".s3.us-east-1.amazonaws.com"],
-              ]
+          - DomainName: !Sub "${StaticContentBucket}.s3.us-east-1.amazonaws.com"
             Id: private-s3-static-content-bucket
             S3OriginConfig:
               OriginAccessIdentity: ""
             OriginAccessControlId: !GetAtt StaticSiteAccessControlOrigin.Id
         Enabled: true
         PriceClass: PriceClass_100
-        CNAMEs:
-          - static.jaminproductions.com
         Aliases:
           - static.jaminproductions.com
         DefaultCacheBehavior:
@@ -64,11 +57,6 @@ Resources:
           AcmCertificateArn: arn:aws:acm:us-east-1:783358359740:certificate/352b4616-b73c-4d83-acc4-0c8451383464
           MinimumProtocolVersion: TLSv1.2_2021
           SslSupportMethod: sni-only
-      Tags:
-        - Key: "Category"
-          Value: "Jamin Productions"
-        - Key: "Type"
-          Value: "Static content site"
   StaticContentBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
@@ -91,16 +79,10 @@ Resources:
               - "*"
             AllowedHeaders:
               - "*"
-      Tags:
-        - Key: "Category"
-          Value: "Jamin Productions"
-        - Key: "Type"
-          Value: "Static content site"
   StaticContentBucketPolicy:
     Type: AWS::S3::BucketPolicy
     DependsOn:
       - StaticSiteDistribution
-      - StaticContentBucket
     Properties:
       Bucket: !Ref StaticContentBucket
       PolicyDocument:
@@ -118,7 +100,6 @@ Resources:
                 "AWS:SourceArn": !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${StaticSiteDistribution}
   SimpleRoutingRecords:
     Type: AWS::Route53::RecordSetGroup
-    DependsOn: StaticSiteDistribution
     Properties:
       Comment: A name record for static.jaminproductions.com
       HostedZoneId: !Ref HostedZoneId
