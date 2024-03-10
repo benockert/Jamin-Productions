@@ -60,6 +60,7 @@ Resources:
   StaticContentBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Ref DomainName
       BucketEncryption:
@@ -79,6 +80,25 @@ Resources:
               - "*"
             AllowedHeaders:
               - "*"
+      # send alert to image filtering Lambda for certain paths
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: "prefix"
+                    Value: "dev/interactive_media/"
+            Function:
+              Fn::ImportValue: "jp-image-filtering-stack-dev-ImageFilteringLambdaArn"
+          - Event: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: "prefix"
+                    Value: "prod/interactive_media/"
+            Function:
+              Fn::ImportValue: "jp-image-filtering-stack-prod-ImageFilteringLambdaArn"
   StaticContentBucketPolicy:
     Type: AWS::S3::BucketPolicy
     DependsOn:

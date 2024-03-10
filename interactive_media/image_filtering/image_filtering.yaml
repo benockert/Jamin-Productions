@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Manages resources for photo mosaic image processing/rekognition flow"
+Parameters:
+  StaticBucketStackName:
+    Type: String
+    Description: CF stack name that manages static content bucket
+    Default: static-jaminproductions-com
+  ServerlessStackName:
+    Type: String
+    Description: CF stack name that manages interactive media upload endpoint (minus the stage name)
+    Default: jamin-productions-api-backend-stack
+  CodeBucketName:
+    Type: String
+    Description: Bucket name where code packages are stored
+    Default: jamin-productions-misc-code
+  LambdaCodePackageVersion:
+    Type: String
+    Description: The version of the Python code package to use for the Lambda
+    Default: 1
+  DeploymentStage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+    Description: Deployment stage (dev or prod)
+Resources:
+  # role to allow the Lambda to read from S3, update DDB entries, run Rekognition, and write logs
+  ImageFileringLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action: sts:AssumeRole
+      RoleName: !Sub JaminProductions-ImageFilteringLambdaRole-${DeploymentStage}
+      Policies:
+        - PolicyName: ImageFilteringLambdaReadFromS3
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject # to be able to upload thumbnail versions
+                Resource:
+                  - Fn::ImportValue: !Sub "${StaticBucketStackName}-StaticBucketArn"
+        - PolicyName: ImageFilteringLambdaUpdateDynamo
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:UpdateItem
+                Resource:
+                  - Fn::ImportValue: !Sub "${ServerlessStackName}-${DeploymentStage}-InteractiveMediaTableArn"
+        - PolicyName: ImageFilteringLambdaRekognition
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - rekognition:DetectModerationLabels
+                Resource:
+                  - "*"
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:*
+                Resource: arn:aws:logs:*:*:*
+  ImageFilteringLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.9
+      Role: !GetAtt ImageFileringLambdaRole.Arn
+      Handler: image_filtering.handler
+      Code:
+        S3Bucket: !Ref CodeBucketName
+        S3Key: !Sub "packages/image_filtering/image_filtering_v${LambdaCodePackageVersion}.zip"
+      Description: Checks image from S3 for moderation labels
+      FunctionName: !Sub "interactive-media-image-filtering-${DeploymentStage}"
+  S3InvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt ImageFilteringLambda.Arn
+      Action: lambda:InvokeFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref "AWS::AccountId"
+      SourceArn:
+        "Fn::ImportValue":
+          "Fn::Sub": "${StaticBucketStackName}-StaticBucketArn"
+Outputs:
+  ImageFilteringLambdaArn:
+    Description: Arn of the image filtering Lambda function
+    Value: !GetAtt ImageFilteringLambda.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-ImageFilteringLambdaArn"
