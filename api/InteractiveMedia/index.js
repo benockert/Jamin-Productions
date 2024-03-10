@@ -1,9 +1,9 @@
 const { fromEnv } = require("@aws-sdk/credential-providers");
-import {
+const {
   PutObjectCommand,
   PutObjectAclCommand,
   S3Client,
-} from "@aws-sdk/client-s3";
+} = require("@aws-sdk/client-s3");
 const { HttpRequest } = require("@smithy/protocol-http");
 const {
   getSignedUrl,

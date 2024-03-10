@@ -9,8 +9,10 @@ const serverless = require("serverless-http");
 var request = require("request");
 
 const app = express();
-const client = new DynamoDBClient();
-const dynamoDbClient = DynamoDBDocumentClient.from(client);
+const dynamoDbClient = DynamoDBDocumentClient.from(new DynamoDBClient());
+const spotifyAuthClient = DynamoDBDocumentClient.from(
+  new DynamoDBClient({ region: "us-east-1" })
+); // spotify auth table is only in us-east-1
 
 app.use(express.json());
 app.use(express.urlencoded()); // needed to handle form-data submissions
@@ -93,7 +95,7 @@ const getAccessToken = async (next, req, res) => {
   };
   const {
     Item: { access_token, expires, refresh_token },
-  } = await dynamoDbClient.send(new GetCommand(params));
+  } = await spotifyAuthClient.send(new GetCommand(params));
   if (Date.now() > expires) {
     console.log("Token expired, requesting new access token");
     getNewAccessToken(refresh_token, next, req, res);
@@ -167,7 +169,7 @@ const updateAccessToken = async ({
       expires: Date.now() + expires_in * 1000,
     },
   };
-  await dynamoDbClient.send(new PutCommand(params));
+  await spotifyAuthClient.send(new PutCommand(params));
 };
 
 // effective signature is (playlistId, accessToken, req, res)
