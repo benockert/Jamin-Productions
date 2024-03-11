@@ -25,7 +25,7 @@ Parameters:
       - prod
     Description: Deployment stage (dev or prod)
 Resources:
-  # role to allow the Lambda to read from S3, update DDB entries, run Rekognition, and write logs
+  # role to allow the Lambda to read and be triggered from S3, update DDB entries, run Rekognition, and write logs
   ImageFileringLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -45,8 +45,10 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - s3:GetObject
-                  - s3:PutObject # to be able to upload thumbnail versions
+                  # - s3:GetObject
+                  # - s3:PutObject # to be able to upload thumbnail versions
+                  - s3:*
+                  - s3-object-lambda:*
                 Resource:
                   - Fn::ImportValue: !Sub "${StaticBucketStackName}-StaticBucketArn"
         - PolicyName: ImageFilteringLambdaUpdateDynamo
@@ -55,7 +57,7 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - dynamodb:UpdateItem
+                  - dynamodb:*
                 Resource:
                   - Fn::ImportValue: !Sub "${ServerlessStackName}-${DeploymentStage}-InteractiveMediaTableArn"
         - PolicyName: ImageFilteringLambdaRekognition
@@ -64,7 +66,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - rekognition:DetectModerationLabels
+                  # - rekognition:DetectModerationLabels
+                  - "rekognition:*"
                 Resource:
                   - "*"
         - PolicyName: root
@@ -75,10 +78,18 @@ Resources:
                 Action:
                   - logs:*
                 Resource: arn:aws:logs:*:*:*
+        - PolicyName: PassRole
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: arn:aws:logs:*:*:*
   ImageFilteringLambda:
     Type: AWS::Lambda::Function
     Properties:
-      Runtime: python3.9
+      Runtime: python3.11
       Role: !GetAtt ImageFileringLambdaRole.Arn
       Handler: image_filtering.handler
       Code:
