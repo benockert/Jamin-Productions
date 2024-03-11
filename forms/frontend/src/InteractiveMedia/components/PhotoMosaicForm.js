@@ -53,7 +53,7 @@ const PhotoMosaicForm = ({ eventId }) => {
     console.log({ data });
     console.log({
       name: data.get("name"),
-      email: data.get("message"),
+      message: data.get("message"),
       file: data.get("photo-upload"),
     });
 
@@ -61,7 +61,7 @@ const PhotoMosaicForm = ({ eventId }) => {
       name: data.get("name"),
       message: data.get("message"),
       fileName: data.get("photo-upload").name,
-      // todo add photo type
+      // TODO: add photo type
     }).then((data) => {
       console.log(data);
       if (data.result === "success") {

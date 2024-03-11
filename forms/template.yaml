@@ -101,7 +101,6 @@ Resources:
         DNSName: !GetAtt CloudFrontDistribution.DomainName
         HostedZoneId: Z2FDTNDATAQYW2
       Type: A
-
 Outputs:
   ReactAppDomainName:
     Value: !GetAtt CloudFrontDistribution.DomainName

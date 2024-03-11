@@ -26,7 +26,7 @@ Parameters:
     Description: Deployment stage (dev or prod)
 Resources:
   # role to allow the Lambda to read and be triggered from S3, update DDB entries, run Rekognition, and write logs
-  ImageFileringLambdaRole:
+  ImageFilteringLambdaRole:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -37,9 +37,9 @@ Resources:
               Service:
                 - lambda.amazonaws.com
             Action: sts:AssumeRole
-      RoleName: !Sub JaminProductions-ImageFilteringLambdaRole-${DeploymentStage}
+      RoleName: !Sub JaminProductions-ImageProcessingLambdaRole-${DeploymentStage}
       Policies:
-        - PolicyName: ImageFilteringLambdaReadFromS3
+        - PolicyName: ImageProcessingLambdaReadFromS3
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -50,8 +50,8 @@ Resources:
                   - s3:*
                   - s3-object-lambda:*
                 Resource:
-                  - Fn::ImportValue: !Sub "${StaticBucketStackName}-StaticBucketArn"
-        - PolicyName: ImageFilteringLambdaUpdateDynamo
+                  - "*"
+        - PolicyName: ImageProcessingLambdaUpdateDynamo
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -60,7 +60,7 @@ Resources:
                   - dynamodb:*
                 Resource:
                   - Fn::ImportValue: !Sub "${ServerlessStackName}-${DeploymentStage}-InteractiveMediaTableArn"
-        - PolicyName: ImageFilteringLambdaRekognition
+        - PolicyName: ImageProcessingLambdaRekognition
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -70,7 +70,7 @@ Resources:
                   - "rekognition:*"
                 Resource:
                   - "*"
-        - PolicyName: root
+        - PolicyName: ImageProcessorLogToCloudwatch
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -78,29 +78,37 @@ Resources:
                 Action:
                   - logs:*
                 Resource: arn:aws:logs:*:*:*
-        - PolicyName: PassRole
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - iam:PassRole
-                Resource: arn:aws:logs:*:*:*
-  ImageFilteringLambda:
+  ImageProcessingLambda:
     Type: AWS::Lambda::Function
     Properties:
       Runtime: python3.11
-      Role: !GetAtt ImageFileringLambdaRole.Arn
-      Handler: image_filtering.handler
+      Role: !GetAtt ImageFilteringLambdaRole.Arn
+      Handler: image_processing.handler
       Code:
         S3Bucket: !Ref CodeBucketName
-        S3Key: !Sub "packages/image_filtering/image_filtering_v${LambdaCodePackageVersion}.zip"
+        S3Key: !Sub "packages/image_processing/image_processing_v${LambdaCodePackageVersion}.zip"
       Description: Checks image from S3 for moderation labels
-      FunctionName: !Sub "interactive-media-image-filtering-${DeploymentStage}"
+      FunctionName: !Sub "interactive-media-image-processing-${DeploymentStage}"
+      Timeout: 10
+      Layers:
+        - !Ref ImageProcessingPillowLayer
+      MemorySize: 512
+  ImageProcessingPillowLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: pillow
+      Description: Layer containing the PIL library files
+      Content:
+        S3Bucket: !Ref CodeBucketName
+        S3Key: packages/layers/pillow.zip
+      CompatibleRuntimes:
+        - python3.9
+        - python3.10
+        - python3.11
   S3InvokeLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !GetAtt ImageFilteringLambda.Arn
+      FunctionName: !GetAtt ImageProcessingLambda.Arn
       Action: lambda:InvokeFunction
       Principal: s3.amazonaws.com
       SourceAccount: !Ref "AWS::AccountId"
@@ -108,8 +116,8 @@ Resources:
         "Fn::ImportValue":
           "Fn::Sub": "${StaticBucketStackName}-StaticBucketArn"
 Outputs:
-  ImageFilteringLambdaArn:
-    Description: Arn of the image filtering Lambda function
-    Value: !GetAtt ImageFilteringLambda.Arn
+  ImageProcessingLambdaArn:
+    Description: Arn of the image processing Lambda function
+    Value: !GetAtt ImageProcessingLambda.Arn
     Export:
-      Name: !Sub "${AWS::StackName}-ImageFilteringLambdaArn"
+      Name: !Sub "${AWS::StackName}-ImageProcessingLambdaArn"

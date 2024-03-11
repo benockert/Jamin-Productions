@@ -16,6 +16,7 @@ const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
 const express = require("express");
 const serverless = require("serverless-http");
+const uuid = require("uuid");
 
 const app = express();
 const client = new DynamoDBClient();
@@ -54,15 +55,19 @@ app.post("/media/:eventId/photo_mosaic", async function (req, res) {
         message: errorMessage + "(field: message)",
       });
     } else {
-      // replace spaces with underscores and add folder path
-      const cleanedFileName = fileName.replace(/\s+/g, "_").toLowerCase(); // todo generate random url
+      // TODO: image extension filtering
+
+      // generate random file name to prevent collisions/overwrites
+      const extension = fileName.split(".").pop().toLowerCase();
+      const randomFileName = `${uuid.v4()}.${extension}`;
       // add the target folder name
-      const cleanedFileNameWithKey = `${process.env.APP_STAGE}/interactive_media/photo_mosaic/${eventId}/${cleanedFileName}`;
+      const randomFileNameWithKey = `${process.env.APP_STAGE}/interactive_media/photo_mosaic/${eventId}/upload/${randomFileName}`;
       // create a presigned url for uploading files
       const presignedUrl = await createPresignedUrlWithoutClient(
-        cleanedFileNameWithKey
+        randomFileNameWithKey
       );
 
+      // todo: add thumbnail url and set to disabled
       const params = {
         TableName: process.env.INTERACTIVE_MEDIA_TABLE,
         Item: {
@@ -70,7 +75,7 @@ app.post("/media/:eventId/photo_mosaic", async function (req, res) {
           submission_timestamp: Date.now(),
           name: name ?? "",
           message: message ?? "",
-          s3_url: `https://${process.env.STATIC_CONTENT_BUCKET}/${cleanedFileNameWithKey}`,
+          s3_url: `https://${process.env.STATIC_CONTENT_BUCKET}/${randomFileNameWithKey}`,
         },
       };
 
@@ -106,7 +111,7 @@ module.exports.handler = serverless(app);
 // ============= HELPERS ==============
 
 const createPresignedUrlWithoutClient = async (key) => {
-  const url = parseUrl(`https://${process.env.CONTENT_STAGING_BUCKET}/${key}`);
+  const url = parseUrl(`https://${process.env.STATIC_CONTENT_BUCKET}/${key}`);
   const presigner = new S3RequestPresigner({
     credentials: fromEnv(),
     region: process.env.STATIC_BUCKET_REGION,
@@ -118,7 +123,7 @@ const createPresignedUrlWithoutClient = async (key) => {
       ...url,
       method: "PUT",
       headers: {
-        "Content-Type": "image/jpeg",
+        "Content-Type": "image/jpeg", // todo dynamically set
       },
     }),
     {

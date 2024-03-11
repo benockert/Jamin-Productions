@@ -67,6 +67,8 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
       CorsConfiguration:
         CorsRules:
           # todo remove all but put
@@ -80,7 +82,7 @@ Resources:
               - "*"
             AllowedHeaders:
               - "*"
-      # send alert to image filtering Lambda for certain paths
+      # send alert to image processing Lambda for upload paths
       NotificationConfiguration:
         LambdaConfigurations:
           - Event: s3:ObjectCreated:*
@@ -88,17 +90,17 @@ Resources:
               S3Key:
                 Rules:
                   - Name: "prefix"
-                    Value: "dev/interactive_media/"
+                    Value: "dev/interactive_media/photo_mosaic/northeastern2024/upload"
             Function:
-              Fn::ImportValue: "jp-image-filtering-stack-dev-ImageFilteringLambdaArn"
+              Fn::ImportValue: "jp-image-processing-stack-dev-ImageProcessingLambdaArn"
           - Event: s3:ObjectCreated:*
             Filter:
               S3Key:
                 Rules:
                   - Name: "prefix"
-                    Value: "prod/interactive_media/"
+                    Value: "prod/interactive_media/photo_mosaic/northeastern2024/upload"
             Function:
-              Fn::ImportValue: "jp-image-filtering-stack-prod-ImageFilteringLambdaArn"
+              Fn::ImportValue: "jp-image-processing-stack-prod-ImageProcessingLambdaArn"
   StaticContentBucketPolicy:
     Type: AWS::S3::BucketPolicy
     DependsOn:

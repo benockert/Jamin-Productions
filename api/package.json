@@ -17,7 +17,8 @@
     "ejs": "^3.1.9",
     "express": "^4.18.2",
     "request": "^2.88.2",
-    "serverless-http": "^3.1.1"
+    "serverless-http": "^3.1.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "serverless-domain-manager": "^7.3.8"

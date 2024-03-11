@@ -1,4 +1,4 @@
-import urllib.parse
+from urllib.parse import unquote_plus
 import boto3
 import logging
 from botocore.exceptions import ClientError
@@ -11,30 +11,24 @@ config = Config(region_name = 'us-east-1')
 
 def handler(event, context):
     try:
-        # rekognition client
-        rekognition = boto3.client('rekognition', config=config)
-
         # get the s3 object from the event (assumption that this lambda is being triggered by an S3 event)
         bucket = event['Records'][0]['s3']['bucket']['name']
-        key = urllib.parse.unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
-        name = key.split("/")[-1]
-
-        logger.info("New image: {} has been uploaded to {}/{} | Running label check...".format(name, bucket, key))
-
-        image = RekognitionImage({'S3Object':{'Bucket':bucket,'Name':key}}, name, rekognition)
-        
-        labels = image.detect_moderation_labels()
-        for label in labels:
-            logger.info(label.to_string())
-
-        labels = image.detect_labels()
-        for label in labels:
-            logger.info(label.to_string())
-
+        key = unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
+        detect_labels(bucket, key)
     except Exception as e:
-        logger.error('Error getting object {} from bucket {}'.format(key, bucket))
         logger.exception(e)
         raise e
+
+def detect_labels(bucket, key):
+    image_name = key.split("/")[-1]
+    logger.info("New image: {} has been uploaded to {}/{} | Running label check...".format(image_name, bucket, key))
+
+    rekognition = boto3.client('rekognition', config=config)
+    image = RekognitionImage({'S3Object':{'Bucket':bucket,'Name':key}}, image_name, rekognition)
+    labels = image.detect_moderation_labels()
+    if len(labels):
+        label_names = ", ".join([l.name for l in labels])
+        logging.info("Detected the following moderation labels in {}: {}".format(image_name, label_names))
 
 class RekognitionImage:
     """
