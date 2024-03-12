@@ -5,6 +5,7 @@ import logging
 import math
 from botocore.exceptions import ClientError
 from botocore.config import Config
+import mimetypes
 
 logging.getLogger().setLevel(logging.INFO)
 logger = logging.getLogger()
@@ -81,13 +82,29 @@ def process_image(bucket, key, local_folder="/tmp"):
     thumbnail_path_local = '{}/{}'.format(local_folder, thumbnail_name.replace("/", "_"))  
 
     s3.download_file(bucket, key, download_path_local)
+    file_content_type = mimetypes.guess_type(download_path_local)[0]
     resize_image(download_path_local, resized_path_local)
     create_thumbnail(resized_path_local, thumbnail_path_local, 200)
 
     logger.info("Uploading resized photo to {}/{}".format(bucket, resized_name))
-    s3.upload_file(resized_path_local, bucket, resized_name)
+    # s3.upload_file(resized_path_local, bucket, resized_name, ExtraArgs={"Metadata": {"Content-Type": file_content_type}})
+    with open(resized_path_local, "rb") as file:
+        s3.put_object(
+            Bucket=bucket,
+            Body=file,
+            Key=resized_name,
+            ContentType=file_content_type
+        )
+
     logger.info("Uploading thumbnail photo to {}/{}".format(bucket, thumbnail_name))
-    s3.upload_file(thumbnail_path_local, bucket, thumbnail_name)
+    # s3.upload_file(thumbnail_path_local, bucket, thumbnail_name, ExtraArgs={"Metadata": {"Content-Type": file_content_type}})
+    with open(thumbnail_path_local, "rb") as file:
+        s3.put_object(
+            Bucket=bucket,
+            Body=file,
+            Key=thumbnail_name,
+            ContentType=file_content_type
+        )
 
     return resized_name, thumbnail_name
 

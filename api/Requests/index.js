@@ -35,32 +35,53 @@ app.use((req, res, next) => {
 app.get("/events/:eventId", async function (req, res) {
   try {
     const eventId = req.params.eventId;
+    const type = req.query.type;
     if (!eventId) {
       res.status(404).json({
         result: "error",
         message: "Event not found",
       });
     } else {
-      const params = {
+      // get primary event information
+      const eventPrimaryParms = {
         TableName: process.env.EVENTS_TABLE,
         Key: {
-          event_id: eventId.toLowerCase(),
+          event_id: `${eventId.toLowerCase()}.primary`,
         },
       };
+      const { Item: primary } = await dynamoDbClient.send(
+        new GetCommand(eventPrimaryParms)
+      );
+      if (primary) {
+        const { name, date } = primary;
 
-      const { Item } = await dynamoDbClient.send(new GetCommand(params));
-      if (Item) {
-        const {
-          event_id: eventId,
-          name,
-          date,
-          request_limit: requestLimit,
-        } = Item;
-        res.json({ eventId, name, date, requestLimit });
+        if (type) {
+          // get secondary event information based on type
+          const secondaryEventParams = {
+            TableName: process.env.EVENTS_TABLE,
+            Key: {
+              event_id: `${eventId.toLowerCase()}.${type}`,
+            },
+          };
+          const { Item: secondary } = await dynamoDbClient.send(
+            new GetCommand(secondaryEventParams)
+          );
+          if (secondary) {
+            res.json({ name, date, ...secondary });
+          } else {
+            res.status(404).json({
+              result: "error",
+              message: `Event '${eventId}' does not have a service with type '${type}'`,
+            });
+          }
+        } else {
+          console.log("No type specified");
+          res.json({ name, date });
+        }
       } else {
         res.status(404).json({
           result: "error",
-          message: `Could not find event with id ${eventId}`,
+          message: `Could not find event with id '${eventId}'`,
         });
       }
     }
@@ -178,4 +199,8 @@ app.use((req, res, next) => {
   });
 });
 
+// for local testing
+// app.listen(3030, () => {
+//   console.log(`Example app listening on port 3030`);
+// });
 module.exports.handler = serverless(app);

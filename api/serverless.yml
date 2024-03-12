@@ -201,12 +201,12 @@ resources:
         AttributeDefinitions:
           - AttributeName: event_name
             AttributeType: S
-          - AttributeName: submission_timestamp
-            AttributeType: N
+          - AttributeName: image_key
+            AttributeType: S
         KeySchema:
           - AttributeName: event_name
             KeyType: HASH
-          - AttributeName: submission_timestamp
+          - AttributeName: image_key
             KeyType: RANGE
         TableName: ${self:custom.interactiveMediaTableName}
         StreamSpecification:
