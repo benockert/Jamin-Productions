@@ -15,11 +15,11 @@ create-changeset:
 
 # make sure to update package version if necessary!
 deploy-image-process-lambda-dev:
-	aws --region us-east-1 cloudformation deploy --template-file image_processing.yaml --capabilities CAPABILITY_NAMED_IAM --stack-name jp-image-processing-stack-dev --parameter-overrides "LambdaCodePackageVersion=2" --tags Category="Jamin Productions" Type="Image processing" AppManagerCFNStackKey="Jamin-Productions-interactive"
+	aws --region us-east-1 cloudformation deploy --template-file image_processing.yaml --capabilities CAPABILITY_NAMED_IAM --stack-name jp-image-processing-stack-dev --parameter-overrides "LambdaCodePackageVersion=3" --tags Category="Jamin Productions" Type="Image processing" AppManagerCFNStackKey="Jamin-Productions-interactive"
 
 # make sure to update package version if necessary!
 deploy-image-process-lambda-prod:
-	aws --region us-east-1 cloudformation deploy --template-file image_processing.yaml --capabilities CAPABILITY_NAMED_IAM --stack-name jp-image-processing-stack-prod --parameter-overrides "LambdaCodePackageVersion=2" "DeploymentStage=prod" --tags Category="Jamin Productions" Type="Image processing" AppManagerCFNStackKey="Jamin-Productions-interactive"
+	aws --region us-east-1 cloudformation deploy --template-file image_processing.yaml --capabilities CAPABILITY_NAMED_IAM --stack-name jp-image-processing-stack-prod --parameter-overrides "LambdaCodePackageVersion=3" "DeploymentStage=prod" --tags Category="Jamin Productions" Type="Image processing" AppManagerCFNStackKey="Jamin-Productions-interactive"
 
 deploy-image-process-lambda: deploy-image-process-lambda-dev deploy-image-process-lambda-prod
 

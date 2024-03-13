@@ -1,11 +1,12 @@
-import boto3
-from urllib.parse import unquote_plus
-from PIL import Image
-import logging
+import os
 import math
-from botocore.exceptions import ClientError
-from botocore.config import Config
+import boto3
+import logging
 import mimetypes
+from PIL import Image
+from botocore.config import Config
+from urllib.parse import unquote_plus
+from botocore.exceptions import ClientError
 
 logging.getLogger().setLevel(logging.INFO)
 logger = logging.getLogger()
@@ -16,15 +17,52 @@ def handler(event, context):
     try:
         # get the s3 object from the event (assumption that this lambda is being triggered by an S3 event)
         bucket = event['Records'][0]['s3']['bucket']['name']
-        key = unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
+        file_key = unquote_plus(event['Records'][0]['s3']['object']['key'], encoding='utf-8')
     
-        result = detect_labels(bucket, key)
-        main_key, thumbnail_key = process_image(bucket, key)
+        # process our image by checking for inappropriate content and resizing
+        enabled = detect_labels(bucket, file_key)
+        ddb_sort_key, ddb_partition_key = process_image(bucket, file_key)
 
-        # update_ddb(main_key, thumbnail_key, result)
+        # assumption is the image submission has been set to inactive in ddb, update to active if the image passes our checks
+        if (enabled):
+            logger.info("Image passes checks, updating active status in ddb.")
+            result = enable_submission_in_ddb(ddb_sort_key, ddb_partition_key)
+            if (result == 200):
+                logger.info("Successfully updated active status of {}".format(ddb_partition_key))
+            else:
+                logger.error("Unsucessful attempt at updating active status of {}".format(ddb_partition_key))
+        else:
+            logger.info("Found inappropriate immage, nothing to update in ddb.")
+        
     except Exception as e:
         logger.exception(e)
         raise e
+    
+def enable_submission_in_ddb(partition_key, sort_key):
+    """
+    Updates active to true for the DDB item with the given keys 
+    """
+    dynamo = boto3.client('dynamodb', config=config)
+    table_name = os.environ['TABLE_NAME']
+    try:
+        result = dynamo.update_item(
+            TableName=table_name,
+            Key={"event_name": {"S": partition_key}, "image_key": {"S": sort_key}},
+            UpdateExpression="set active=:r",
+            ExpressionAttributeValues={":r": {"BOOL": True}},
+        )
+    except ClientError as err:
+        logger.error(
+            "Couldn't set %s to active in table %s. Here's why: %s: %s",
+            sort_key,
+            table_name,
+            err.response["Error"]["Code"],
+            err.response["Error"]["Message"],
+        )
+        return 500
+    else:
+        return result["ResponseMetadata"]["HTTPStatusCode"]
+
 
 def resize_image(in_path, out_path):
     """
@@ -106,7 +144,7 @@ def process_image(bucket, key, local_folder="/tmp"):
             ContentType=file_content_type
         )
 
-    return resized_name, thumbnail_name
+    return key.split("/")[-3], f"image.{image_name.split('.')[-2]}"
 
 def detect_labels(bucket, key):
     """
@@ -208,6 +246,7 @@ class RekognitionModerationLabel(RekognitionLabel):
         # self.parent_name = label_obj["ParentName"]
         # self.taxonomy_level = label_obj["TaxonomyLevel"]
 
+# for local testing
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO,
@@ -217,6 +256,16 @@ if __name__ == "__main__":
     )
 
     bucket = "static.jaminproductions.com"
-    key = "dev/interactive_media/photo_mosaic/northeastern2024/upload/AG015076_Benjamin Ockert (3).jpg"
+    key = "dev/interactive_media/photo_mosaic/northeastern2024/upload/5b3e44b0-8824-4d90-8f40-c57ad1239633.jpg"
     result = detect_labels(bucket, key)
-    main_key, thumbnail_key = process_image(bucket, key, "./test")
+    ddb_sort_key, ddb_partition_key = process_image(bucket, key, "./test")
+    if (result):
+        logger.info("Image passes checks, updating active status in ddb.")
+        result = enable_submission_in_ddb(ddb_sort_key, ddb_partition_key)
+        if (result == 200):
+            logger.info("Successfully updated active status of {}".format(ddb_partition_key))
+        else:
+            logger.error("Unsucessful attempt at updating active status of {}".format(ddb_partition_key))
+    else:
+        logger.info("Found inapropriate immage, nothing to update in ddb.")
+    # enable_submission_in_ddb("northeastern2024", "5b3e44b0-8824-4d90-8f40-c57ad1239633")

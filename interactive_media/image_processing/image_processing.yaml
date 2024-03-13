@@ -93,6 +93,10 @@ Resources:
       Layers:
         - !Ref ImageProcessingPillowLayer
       MemorySize: 512
+      Environment:
+        Variables:
+          TABLE_NAME:
+            Fn::ImportValue: !Sub "${ServerlessStackName}-${DeploymentStage}-InteractiveMediaTableName"
   ImageProcessingPillowLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
