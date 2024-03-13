@@ -43,7 +43,7 @@ app.get("/media/:eventId/photo_mosaic", async function (req, res) {
     } else {
       // gets active images for event matching eventId
       const params = {
-        TableName: "interactive-media-form-submission-dev",
+        TableName: process.env.INTERACTIVE_MEDIA_TABLE,
         Limit: 50,
         KeyConditionExpression: "#npk = :vpk AND begins_with(#nsk, :vsk)",
         FilterExpression: "#n0 = :v0",

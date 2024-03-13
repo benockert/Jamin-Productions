@@ -108,7 +108,7 @@ const PhotoMosaicForm = ({ eventId, formTitle, maxMessageLength }) => {
         setFileUploaded(false);
         setFile();
         setFileError(true);
-        setFormMessage({ message: "Selected photo is too large (max 15 MB)" });
+        setFormMessage({ message: "Selected photo is too large (max: 15MB)." });
       } else {
         setFileUploaded(true);
         setFile(file);
@@ -154,12 +154,6 @@ const PhotoMosaicForm = ({ eventId, formTitle, maxMessageLength }) => {
         noValidate
         onSubmit={handleSubmit}
         sx={{
-          // for the form message wrapping
-          display: "flex",
-          alignContent: "center",
-          justifyContent: "center",
-          flexWrap: "wrap",
-
           marginTop: 1,
           width: "100%",
           overflowY: "auto",
@@ -244,7 +238,7 @@ const PhotoMosaicForm = ({ eventId, formTitle, maxMessageLength }) => {
               "& .MuiChip-outlined": {
                 border: "none",
                 width: "100%",
-                fontSize: "1em",
+                fontSize: "1.1em",
                 fontWeight: 600,
               },
             }}
