@@ -1,29 +1,31 @@
 import Box from "@mui/material/Box";
 
-const FloatingImages = () => {
-  const portraitHeader = "CommencementWeek2024_portrait.png";
-  const landscapeHeader = "CommencementWeek2024_landscape.png";
-  const footer = "LikeAHusky.png";
-
+const FloatingImages = (props) => {
+  const {
+    header_portrait: portraitHeader,
+    header_landscape: landscapeHeader,
+    footer_portrait: portraitFooter,
+    footer_landscape: landscapeFooter,
+  } = props.eventInfo;
   return (
     <>
       <Box
         component="img"
         sx={{
           content: {
-            xs: `url(/images/photos/${portraitHeader})`,
-            md: `url(/images/photos/${landscapeHeader})`,
+            xs: `url(${portraitHeader})`,
+            md: `url(${landscapeHeader})`,
           },
           position: "absolute",
           top: {
             xs: "auto",
-            md: "2em",
+            md: "25px",
           },
           bottom: {
-            xs: "2em",
+            xs: "25px",
             md: "auto",
           },
-          left: "2em",
+          left: "25px",
           height: {
             xs: "auto",
             md: "clamp(300px, 400px, 40%)",
@@ -38,21 +40,24 @@ const FloatingImages = () => {
       <Box
         component="img"
         sx={{
-          content: `url(/images/photos/${footer})`,
+          content: {
+            xs: `url(${portraitFooter})`,
+            md: `url(${landscapeFooter})`,
+          },
           position: "absolute",
           top: {
-            xs: "1em",
+            xs: "13px",
             md: "auto",
           },
           bottom: {
             xs: "auto",
-            md: "1em",
+            md: "13px",
           },
-          right: "0.5em",
+          right: "7px",
           height: "auto",
           width: "clamp(150px, 20%, 250px)",
         }}
-        alt="Header"
+        alt="Footer"
       />
     </>
   );

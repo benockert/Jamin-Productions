@@ -4,6 +4,10 @@ import InteractiveMediaRoutes from "./InteractiveMedia/routes";
 
 function App() {
   const router = createBrowserRouter([
+    {
+      path: "/",
+      errorElement: <></>,
+    },
     ...RequestsRoutes,
     ...InteractiveMediaRoutes,
   ]);

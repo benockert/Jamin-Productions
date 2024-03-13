@@ -26,7 +26,7 @@ export async function postData(path, data = {}) {
 export async function putImage(url, file) {
   // const blob = new Blob([file]);
   const headers = new Headers({
-    "Content-Type": "image/jpeg",
+    "Content-Type": file.type,
     "Content-Length": file.size,
   });
   const response = await fetch(url, {

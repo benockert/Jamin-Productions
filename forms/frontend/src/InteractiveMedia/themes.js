@@ -1,12 +1,20 @@
 import { createTheme } from "@mui/material/styles";
 
 const mainColor = "#fff";
+const success = "#66bb6a";
+const error = "red";
 
-export const northeastern2024 = createTheme({
+export const theme = createTheme({
   palette: {
     mode: "dark",
     primary: {
       main: mainColor,
+      success: success,
+      error: error,
+      brand: "#C8102E",
+    },
+    secondary: {
+      main: "#171717",
     },
   },
   typography: {
@@ -27,7 +35,7 @@ export const northeastern2024 = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          background: "linear-gradient(to right, #f21f4d, #f7eb3b)",
+          // background: "linear-gradient(to right, #f21f4d, #f7eb3b)",
           color: mainColor,
         },
       },

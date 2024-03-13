@@ -26,7 +26,9 @@ const Item = styled(Paper)(({ theme }) => ({
 
 export async function viewRequestsPageLoader({ params, request }) {
   const eventId = params.eventId;
-  const { data: eventInfo, statusCode } = await getData(`events/${eventId}`);
+  const { data: eventInfo, statusCode } = await getData(
+    `events/${eventId}?type=requests`
+  );
   const { data: eventRequests } = await getData(`requests/${eventId}`);
 
   if (statusCode === 404) {

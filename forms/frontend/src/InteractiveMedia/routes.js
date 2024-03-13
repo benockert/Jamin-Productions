@@ -1,6 +1,8 @@
 import { redirect } from "react-router-dom";
 import Home from "./pages/Home";
-import Northeastern2024PhotoWallForm from "./pages/Northeastern2024PhotoWallForm";
+import SubmitToPhotoMosaic, {
+  submitToPhotoMosaicPageLoader,
+} from "./pages/SubmitToPhotoMosaic";
 
 const basepath = "/interactive";
 const InteractiveMediaRoutes = [
@@ -9,8 +11,10 @@ const InteractiveMediaRoutes = [
     element: <Home />,
   },
   {
-    path: `${basepath}/Northeastern2024PhotoWall`,
-    element: <Northeastern2024PhotoWallForm />,
+    path: `${basepath}/mosaic/:eventId`,
+    element: <SubmitToPhotoMosaic />,
+    loader: submitToPhotoMosaicPageLoader,
+    errorElement: <Home />,
   },
   {
     // 404: page not found

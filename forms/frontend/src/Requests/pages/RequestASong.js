@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLoaderData } from "react-router-dom";
-import { useParams, redirect } from "react-router-dom";
+import { useLoaderData, useParams, redirect } from "react-router-dom";
 import { Form } from "../components/Form";
 import Header from "../components/Header";
 import { postData, getData } from "../../api";
@@ -19,7 +18,7 @@ import "./RequestASong.css";
 // url is invalid
 export async function requestASongPageLoader({ params, request }) {
   const eventId = params.eventId;
-  return await getData(`events/${eventId}`).then((res) => {
+  return await getData(`events/${eventId}?type=requests`).then((res) => {
     if (res.statusCode === 404) {
       return redirect("/");
     } else {
