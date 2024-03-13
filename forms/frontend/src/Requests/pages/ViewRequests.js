@@ -29,7 +29,9 @@ export async function viewRequestsPageLoader({ params, request }) {
   const { data: eventInfo, statusCode } = await getData(
     `events/${eventId}?type=requests`
   );
-  const { data: eventRequests } = await getData(`requests/${eventId}`);
+  const {
+    data: { items: eventRequests },
+  } = await getData(`requests/${eventId}`);
 
   if (statusCode === 404) {
     return redirect("/");

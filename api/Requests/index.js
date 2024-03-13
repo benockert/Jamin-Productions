@@ -53,7 +53,7 @@ app.get("/events/:eventId", async function (req, res) {
         new GetCommand(eventPrimaryParms)
       );
       if (primary) {
-        const { name, date } = primary;
+        const { name, date, brand_color } = primary;
 
         if (type) {
           // get secondary event information based on type
@@ -67,7 +67,7 @@ app.get("/events/:eventId", async function (req, res) {
             new GetCommand(secondaryEventParams)
           );
           if (secondary) {
-            res.json({ name, date, ...secondary });
+            res.json({ name, date, brand_color, ...secondary });
           } else {
             res.status(404).json({
               result: "error",
@@ -97,6 +97,7 @@ app.get("/events/:eventId", async function (req, res) {
 app.get("/requests/:eventId", async function (req, res) {
   try {
     const eventId = req.params.eventId;
+    const lek = req.query.lek; // last evaluated sort key (we know partition key from eventId)
 
     if (!eventId) {
       res.status(404).json({
@@ -118,10 +119,18 @@ app.get("/requests/:eventId", async function (req, res) {
         Select: "SPECIFIC_ATTRIBUTES",
         ProjectionExpression: "#ap0,#ap1,#ap2",
       };
+      if (lek) {
+        params.ExclusiveStartKey = {
+          event_name: eventId,
+          submission_timestamp: Number(lek),
+        };
+      }
 
       console.log("Submitting Scan request:", params);
-      const { Items } = await dynamoDbClient.send(new ScanCommand(params));
-      res.json(Items);
+      const { Items, LastEvaluatedKey } = await dynamoDbClient.send(
+        new ScanCommand(params)
+      );
+      res.json({ lek: LastEvaluatedKey?.submission_timestamp, items: Items });
     }
   } catch (error) {
     console.log(error);
@@ -200,7 +209,7 @@ app.use((req, res, next) => {
 });
 
 // for local testing
-// app.listen(3030, () => {
-//   console.log(`Example app listening on port 3030`);
-// });
+app.listen(3030, () => {
+  console.log(`Example app listening on port 3030`);
+});
 module.exports.handler = serverless(app);

@@ -5,7 +5,11 @@ const { parseUrl } = require("@smithy/url-parser");
 const { formatUrl } = require("@aws-sdk/util-format-url");
 const { Hash } = require("@smithy/hash-node");
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const { DynamoDBDocumentClient, PutCommand } = require("@aws-sdk/lib-dynamodb");
+const {
+  DynamoDBDocumentClient,
+  PutCommand,
+  QueryCommand,
+} = require("@aws-sdk/lib-dynamodb");
 const express = require("express");
 const serverless = require("serverless-http");
 const uuid = require("uuid");
@@ -25,6 +29,58 @@ app.use((req, res, next) => {
 
   // call so continues to routes
   next();
+});
+
+app.get("/media/:eventId/photo_mosaic", async function (req, res) {
+  try {
+    const eventId = req.params.eventId;
+    const lek = req.query.lek; // last evaluated sort key, we know the partition key from the eventId
+    if (!eventId) {
+      res.status(404).json({
+        result: "error",
+        message: "Event not found",
+      });
+    } else {
+      // gets active images for event matching eventId
+      const params = {
+        TableName: "interactive-media-form-submission-dev",
+        Limit: 50,
+        KeyConditionExpression: "#npk = :vpk AND begins_with(#nsk, :vsk)",
+        FilterExpression: "#n0 = :v0",
+        ExpressionAttributeNames: {
+          "#npk": "event_name",
+          "#nsk": "image_key",
+          "#n0": "active",
+        },
+        ExpressionAttributeValues: {
+          ":vpk": eventId,
+          ":vsk": "image",
+          ":v0": true,
+        },
+        Select: "ALL_ATTRIBUTES",
+      };
+      if (lek) {
+        params.ExclusiveStartKey = {
+          event_name: eventId,
+          image_key: lek,
+        };
+      }
+
+      console.log("Submitting Query request:", params);
+      const { Items, LastEvaluatedKey } = await dynamoDbClient.send(
+        new QueryCommand(params)
+      );
+
+      // return the last evaluate key as well so the client can handle when to query for more items
+      res.json({ lek: LastEvaluatedKey?.image_key, items: Items });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      result: "error",
+      message: "There was an error getting interactive media",
+    });
+  }
 });
 
 app.post("/media/:eventId/photo_mosaic", async function (req, res) {
@@ -71,7 +127,7 @@ app.post("/media/:eventId/photo_mosaic", async function (req, res) {
           TableName: process.env.INTERACTIVE_MEDIA_TABLE,
           Item: {
             event_name: eventId.toLowerCase(), // partition key
-            image_key: imageKey, // sort key
+            image_key: `image.${imageKey}`, // sort key
             submission_timestamp: Date.now(),
             submitted_by: name ?? "",
             message: message ?? "",
@@ -87,7 +143,7 @@ app.post("/media/:eventId/photo_mosaic", async function (req, res) {
           result: "success",
           presignedUrl,
           message: `Thank you for your submission${
-            name == "" ? name : `, ${name}`
+            name == "" ? name : `, ${name.split(" ")[0]}`
           }!`,
         });
       }
@@ -109,9 +165,9 @@ app.use((req, res, next) => {
 });
 
 // for local testing
-// app.listen(3030, () => {
-//   console.log(`Example app listening on port 3030`);
-// });
+app.listen(3030, () => {
+  console.log(`Example app listening on port 3030`);
+});
 module.exports.handler = serverless(app);
 
 // ============= HELPERS ==============
@@ -1385,7 +1441,14 @@ const containsProfanity = (name, message) => {
   name_tokens = name.toLowerCase().split(" ");
 
   const tokens = message_tokens.concat(name_tokens);
-  return tokens.some((token) => {
+  const anyMatched = tokens.some((token) => {
     return blocked.includes(token);
   });
+
+  const blob = tokens.join("");
+  const anyInBlob = blocked.some((profanity) => {
+    return blob.includes(profanity);
+  });
+
+  return anyMatched || anyInBlob;
 };
