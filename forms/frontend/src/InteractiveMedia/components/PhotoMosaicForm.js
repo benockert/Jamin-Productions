@@ -154,6 +154,12 @@ const PhotoMosaicForm = ({ eventId, formTitle, maxMessageLength }) => {
         noValidate
         onSubmit={handleSubmit}
         sx={{
+          // for the form message wrapping
+          display: "flex",
+          alignContent: "center",
+          justifyContent: "center",
+          flexWrap: "wrap",
+
           marginTop: 1,
           width: "100%",
           overflowY: "auto",

@@ -107,7 +107,7 @@ app.post("/media/:eventId/photo_mosaic", async function (req, res) {
       if (containsProfanity(name, message)) {
         res.status(200).json({
           result: "error",
-          message: `Your submission has been blocked due to profanity!`,
+          message: `Sorry, no profanity is allowed!`,
         });
       } else {
         // get file extension and generate random uuid to prevent collisions/overwrites
