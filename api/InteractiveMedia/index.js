@@ -142,9 +142,7 @@ app.post("/media/:eventId/photo_mosaic", async function (req, res) {
         res.status(200).json({
           result: "success",
           presignedUrl,
-          message: `Thank you for your submission${
-            name == "" ? name : `, ${name.split(" ")[0]}`
-          }!`,
+          message: "Thank you for your submission!",
         });
       }
     }
@@ -1434,20 +1432,177 @@ const containsProfanity = (name, message) => {
     "stroke",
     "stroking",
     "stupid",
-    "stup…",
+    "stupidfuck",
+    "stupidfucker",
+    "suck",
+    "suckdick",
+    "sucker",
+    "suckme",
+    "suckmyass",
+    "suckmydick",
+    "suckmytit",
+    "suckoff",
+    "suicide",
+    "swallow",
+    "swallower",
+    "swalow",
+    "swastika",
+    "sweetness",
+    "syphilis",
+    "taboo",
+    "taff",
+    "tampon",
+    "tang",
+    "tantra",
+    "tarbaby",
+    "tard",
+    "teat",
+    "terror",
+    "terrorist",
+    "teste",
+    "testicle",
+    "testicles",
+    "thicklips",
+    "thirdeye",
+    "thirdleg",
+    "threesome",
+    "threeway",
+    "timbernigger",
+    "tinkle",
+    "tit",
+    "titbitnipply",
+    "titfuck",
+    "titfucker",
+    "titfuckin",
+    "titjob",
+    "titlicker",
+    "titlover",
+    "tits",
+    "tittie",
+    "titties",
+    "titty",
+    "tnt",
+    "toilet",
+    "tongethruster",
+    "tongue",
+    "tonguethrust",
+    "tonguetramp",
+    "tortur",
+    "torture",
+    "tosser",
+    "towelhead",
+    "trailertrash",
+    "tramp",
+    "trannie",
+    "tranny",
+    "transexual",
+    "transsexual",
+    "transvestite",
+    "triplex",
+    "trisexual",
+    "trojan",
+    "trots",
+    "tuckahoe",
+    "tunneloflove",
+    "turd",
+    "turnon",
+    "twat",
+    "twink",
+    "twinkie",
+    "twobitwhore",
+    "uck",
+    "uk",
+    "unfuckable",
+    "upskirt",
+    "uptheass",
+    "upthebutt",
+    "urinary",
+    "urinate",
+    "urine",
+    "usama",
+    "uterus",
+    "vagina",
+    "vaginal",
+    "vatican",
+    "vibr",
+    "vibrater",
+    "vibrator",
+    "vietcong",
+    "violence",
+    "virgin",
+    "virginbreaker",
+    "vomit",
+    "vulva",
+    "wab",
+    "wank",
+    "wanker",
+    "wanking",
+    "waysted",
+    "weapon",
+    "weenie",
+    "weewee",
+    "welcher",
+    "welfare",
+    "wetb",
+    "wetback",
+    "wetspot",
+    "whacker",
+    "whash",
+    "whigger",
+    "whiskey",
+    "whiskeydick",
+    "whiskydick",
+    "whit",
+    "whitenigger",
+    "whites",
+    "whitetrash",
+    "whitey",
+    "whiz",
+    "whop",
+    "whore",
+    "whorefucker",
+    "whorehouse",
+    "wigger",
+    "willie",
+    "williewanker",
+    "willy",
+    "wn",
+    "wog",
+    "women's",
+    "wop",
+    "wtf",
+    "wuss",
+    "wuzzie",
+    "xtc",
+    "xxx",
+    "yankee",
+    "yellowman",
+    "zigabo",
+    "zipperhead",
   ];
 
-  message_tokens = message.toLowerCase().split(" ");
   name_tokens = name.toLowerCase().split(" ");
+  message_tokens = message.toLowerCase().split(" ");
 
-  const tokens = message_tokens.concat(name_tokens);
+  // check for explicit match with a word in the blocked list
+  const tokens = name_tokens.concat(message_tokens); // keep name then message order
   const anyMatched = tokens.some((token) => {
-    return blocked.includes(token);
+    if (blocked.includes(token)) {
+      console.log(token);
+      return true;
+    }
+    return false;
   });
 
+  // check the other way around, if any of the blocked words are a substring of our tokens joining with no spaces (to catch e.g. stupidmotherfucker)
+  // we don't want substrings of common words like "ass" < "Class" to be filtered out, so only compare blocked words 5 characters or greater
   const blob = tokens.join("");
   const anyInBlob = blocked.some((profanity) => {
-    return blob.includes(profanity);
+    if (profanity.length > 4 && blob.includes(profanity)) {
+      console.log(profanity);
+      return true;
+    }
+    return false;
   });
 
   return anyMatched || anyInBlob;
