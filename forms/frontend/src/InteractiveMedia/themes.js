@@ -35,7 +35,6 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          // background: "linear-gradient(to right, #f21f4d, #f7eb3b)",
           color: mainColor,
         },
       },

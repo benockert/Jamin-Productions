@@ -33,8 +33,12 @@ const SubmitToPhotoMosaic = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="100vh"
+        className="form-container" // need to set custom variable for viewport height for consistency on mobile
         sx={{
+          // minHeight: {
+          //   xs: "90vh",
+          //   sm: "100vh",
+          // },
           backgroundImage: {
             xs: `url(${eventInfo.background_portrait})`,
             md: `url(${eventInfo.background_landscape})`,
@@ -49,14 +53,22 @@ const SubmitToPhotoMosaic = () => {
         }}
       >
         <CssBaseline />
-        <FloatingImages eventInfo={eventInfo} />
+
         <PhotoMosaicForm
           eventId={eventId}
           formTitle={eventInfo.form_title}
           maxMessageLength={eventInfo.message_length_max}
-          style={{ minWidth: "40vw", maxHeight: "70vh" }}
+          style={{
+            minWidth: "40vw",
+            maxHeight: "70vh",
+            marginBottom: {
+              xs: "60% !important",
+              sm: "auto",
+            },
+          }}
         />
       </Box>
+      <FloatingImages eventInfo={eventInfo} />
     </ThemeProvider>
   );
 };

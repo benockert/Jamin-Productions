@@ -37,28 +37,30 @@ const FloatingImages = (props) => {
         }}
         alt="Header"
       />
-      <Box
-        component="img"
-        sx={{
-          content: {
-            xs: `url(${portraitFooter})`,
-            md: `url(${landscapeFooter})`,
-          },
-          position: "absolute",
-          top: {
-            xs: "13px",
-            md: "auto",
-          },
-          bottom: {
-            xs: "auto",
-            md: "13px",
-          },
-          right: "7px",
-          height: "auto",
-          width: "clamp(150px, 20%, 250px)",
-        }}
-        alt="Footer"
-      />
+      <Box component="footer">
+        <Box
+          component="img"
+          sx={{
+            content: {
+              xs: `url(${portraitFooter})`,
+              md: `url(${landscapeFooter})`,
+            },
+            position: "absolute",
+            top: {
+              xs: "13px",
+              md: "auto",
+            },
+            bottom: {
+              xs: "auto",
+              md: "13px",
+            },
+            right: "7px",
+            height: "auto",
+            width: "clamp(150px, 20%, 250px)",
+          }}
+          alt="Footer"
+        />
+      </Box>
     </>
   );
 };

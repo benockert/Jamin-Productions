@@ -5,4 +5,11 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  width: 100%;
+}
+
+.form-container {
+  min-height: 100vh; /* fallback */
+  min-height: calc(var(--vh, 1vh) * 100);
 }
