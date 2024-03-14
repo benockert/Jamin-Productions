@@ -13,3 +13,26 @@ body {
   min-height: 100vh; /* fallback */
   min-height: calc(var(--vh, 1vh) * 100);
 }
+
+/* opacity transition */
+/* Chrome, Safari, Opera */
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0.2;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Standard syntax */
+@keyframes fadeIn {
+  from {
+    opacity: 0.2;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

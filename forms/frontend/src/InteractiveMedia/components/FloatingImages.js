@@ -28,7 +28,7 @@ const FloatingImages = (props) => {
           left: "25px",
           height: {
             xs: "auto",
-            md: "clamp(300px, 400px, 40%)",
+            md: "clamp(250px, 45%, 375px)",
           },
           width: {
             xs: "clamp(200px, 70%, 300px)",
@@ -56,7 +56,7 @@ const FloatingImages = (props) => {
             },
             right: "7px",
             height: "auto",
-            width: "clamp(150px, 20%, 250px)",
+            width: "clamp(150px, 25%, 275px)",
           }}
           alt="Footer"
         />

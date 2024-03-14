@@ -35,10 +35,6 @@ const SubmitToPhotoMosaic = () => {
         alignItems="center"
         className="form-container" // need to set custom variable for viewport height for consistency on mobile
         sx={{
-          // minHeight: {
-          //   xs: "90vh",
-          //   sm: "100vh",
-          // },
           backgroundImage: {
             xs: `url(${eventInfo.background_portrait})`,
             md: `url(${eventInfo.background_landscape})`,
@@ -50,6 +46,9 @@ const SubmitToPhotoMosaic = () => {
             md: "center",
           },
           backgroundColor: eventInfo.brand_color ?? "#171717",
+          // transitions for background
+          // WebkitAnimation: "fadeIn 1s",
+          // animation: "fadeIn 1s",
         }}
       >
         <CssBaseline />

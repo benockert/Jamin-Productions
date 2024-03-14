@@ -118,7 +118,7 @@ const PhotoMosaicForm = ({ eventId, formTitle, maxMessageLength }) => {
         setFile();
         setFileError(true);
         setFormMessage({
-          message: "Selected photo is too large (15MB limit).",
+          message: "Selected photo is too large.",
         });
       } else {
         setFileUploaded(true);
