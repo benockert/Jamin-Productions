@@ -1,11 +1,14 @@
 import boto3
 import csv
 from botocore.config import Config
+import time
+import math
 
 def batch_write(ddb, items, table_name):
     entries = []
 
     # events table
+    iter = 0
     for item in items:
         if "events" in table_name:
             entry = {
@@ -46,6 +49,23 @@ def batch_write(ddb, items, table_name):
                     }
                 }
             }
+            entries.append(entry)
+        elif "media" in table_name:
+            entry = {
+                'PutRequest': {
+                    'Item': {
+                        'event_name': {'S': str(item[0])},
+                        'image_key': {'S': f"image.{math.floor(time.time()*1000) + iter}-{str(item[1].split('image.')[1])}"},
+                        'active': {'BOOL': bool(item[2] == "true")},
+                        'full_image': {'S': str(item[3])},
+                        'message': {'S': str(item[4])},
+                        'submission_timestamp': {'N': str(item[5])},
+                        'submitted_by': {'S': str(item[6])},
+                        'thumbnail_image': {'S': str(item[7])},
+                    }
+                }
+            }
+            iter+=1
             entries.append(entry)
     
     if entries:
@@ -94,17 +114,25 @@ def main():
     # requests_table = "song-requests-form-submission-dev"
     # csv_to_ddb(ddb, requests_file, requests_table)
 
-    events_file = "./files/events.csv"
-    events_table = "jamin-productions-events-prod"
-    csv_to_ddb(ddb, events_file, events_table)
+    # events_file = "./files/events.csv"
+    # events_table = "jamin-productions-events-prod"
+    # csv_to_ddb(ddb, events_file, events_table)
 
-    requests_file = "./files/requests.csv"
-    requests_table = "song-requests-form-submission-prod"
-    csv_to_ddb(ddb, requests_file, requests_table)
+    # requests_file = "./files/requests.csv"
+    # requests_table = "song-requests-form-submission-prod"
+    # csv_to_ddb(ddb, requests_file, requests_table)
 
-    spotify_file = "./files/spotify_auth.csv"
-    spotify_table = "requests-spotify-auth"
-    csv_to_ddb(ddb, spotify_file, spotify_table)  
+    # spotify_file = "./files/spotify_auth.csv"
+    # spotify_table = "requests-spotify-auth"
+    # csv_to_ddb(ddb, spotify_file, spotify_table)  
+
+    # media_file = "./files/results_change_keys.csv"
+    # media_table = "interactive-media-form-submission-dev"
+    # csv_to_ddb(ddb, media_file, media_table)  
+
+    media_file = "./files/prod_key_change.csv"
+    media_table = "interactive-media-form-submission-prod"
+    csv_to_ddb(ddb, media_file, media_table)  
 
 
 if __name__ == "__main__":
