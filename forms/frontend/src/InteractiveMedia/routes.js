@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import SubmitToPhotoMosaic, {
   submitToPhotoMosaicPageLoader,
 } from "./pages/SubmitToPhotoMosaic";
+import ViewPhotos, { viewPhotosPageLoader } from "./pages/ViewPhotos";
 
 const basepath = "/interactive";
 const InteractiveMediaRoutes = [
@@ -14,6 +15,12 @@ const InteractiveMediaRoutes = [
     path: `${basepath}/mosaic/:eventId`,
     element: <SubmitToPhotoMosaic />,
     loader: submitToPhotoMosaicPageLoader,
+    errorElement: <Home />,
+  },
+  {
+    path: `${basepath}/mosaic/:eventId/view`,
+    element: <ViewPhotos />,
+    loader: viewPhotosPageLoader,
     errorElement: <Home />,
   },
   {
