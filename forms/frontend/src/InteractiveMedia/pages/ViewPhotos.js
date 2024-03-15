@@ -9,15 +9,13 @@ import { useLoaderData, useParams, redirect } from "react-router-dom";
 
 export async function viewPhotosPageLoader({ params, request }) {
   const eventId = params.eventId;
-  return await getData(`media/${eventId}/photo_mosaic?pageSize=${10}`).then(
-    (res) => {
-      if (res.statusCode === 404) {
-        return redirect("/");
-      } else {
-        return res.data ?? {};
-      }
+  return await getData(`media/${eventId}/photo_mosaic`).then((res) => {
+    if (res.statusCode === 404) {
+      return redirect("/");
+    } else {
+      return res.data ?? {};
     }
-  );
+  });
 }
 
 const ImageGalleryList = styled("ul")(({ theme }) => ({
@@ -39,56 +37,13 @@ const ImageGalleryList = styled("ul")(({ theme }) => ({
 
 const ViewPhotos = () => {
   const { eventId } = useParams();
-  const { items, lek } = useLoaderData();
-  const [nextKey, setNextkey] = useState(lek);
-  const [images, setImages] = useState(items);
-  console.log("Starting:", { images, nextKey });
-
-  const getNextPage = async () => {
-    await getData(
-      `media/${eventId}/photo_mosaic?lek=${nextKey}&pageSize=${5}`
-    ).then((res) => {
-      const { items, lek } = res.data;
-      setNextkey(lek);
-      setImages([items, ...images]); // keep existing and perserve order
-      console.log("New:", images);
-    });
-  };
-
-  // event listending handler for reaching the bottom of the page
-  // request the next page of data
-  const handleScroll = (event) => {
-    if (
-      Math.abs(
-        event.target.scrollingElement.scrollHeight -
-          (event.target.scrollingElement.scrollTop +
-            event.target.scrollingElement.clientHeight)
-      ) <= 1
-    ) {
-      getNextPage();
-    }
-  };
-
-  useEffect(() => {
-    // only add an event listener if there is more data to retrieve
-    if (nextKey) {
-      console.log("Mounting");
-      window.addEventListener("scroll", (event) => handleScroll(event));
-      return () => {
-        console.log("Unmounting");
-        window.removeEventListener(
-          "scroll",
-          console.log("Removing scroll listener")
-        );
-      };
-    }
-  }, [nextKey]); // only cleanup/add another listening if the key has changed, otherwise we will get the same data
+  const [data, setData] = useState(useLoaderData());
 
   return (
     <Box sx={{ backgroundColor: "#171717", minHeight: "100vh" }}>
       <Stack direction="row" justifyContent="center" alignItems="center">
         <ImageGalleryList>
-          {images.map((image, index) => (
+          {data.items.map((image, index) => (
             <ImageListItem key={index} sx={{ border: "solid white 1px" }}>
               <img
                 srcSet={`${image.thumbnail_image} 100w, ${image.full_image} 400w`}

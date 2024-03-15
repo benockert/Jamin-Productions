@@ -209,7 +209,7 @@ app.use((req, res, next) => {
 });
 
 // for local testing
-app.listen(3030, () => {
-  console.log(`Example app listening on port 3030`);
-});
+// app.listen(3030, () => {
+//   console.log(`Example app listening on port 3030`);
+// });
 module.exports.handler = serverless(app);

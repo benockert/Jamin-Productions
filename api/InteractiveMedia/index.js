@@ -34,6 +34,7 @@ app.use((req, res, next) => {
 app.get("/media/:eventId/photo_mosaic", async function (req, res) {
   try {
     const eventId = req.params.eventId;
+    const pageSize = req.query.pageSize ?? 50; // default to max
     const lek = req.query.lek; // last evaluated sort key, we know the partition key from the eventId
     if (!eventId) {
       res.status(404).json({
@@ -44,7 +45,7 @@ app.get("/media/:eventId/photo_mosaic", async function (req, res) {
       // gets active images for event matching eventId
       const params = {
         TableName: process.env.INTERACTIVE_MEDIA_TABLE,
-        Limit: 50,
+        Limit: Number(pageSize),
         KeyConditionExpression: "#npk = :vpk AND begins_with(#nsk, :vsk)",
         FilterExpression: "#n0 = :v0",
         ExpressionAttributeNames: {
@@ -58,6 +59,7 @@ app.get("/media/:eventId/photo_mosaic", async function (req, res) {
           ":v0": true,
         },
         Select: "ALL_ATTRIBUTES",
+        ScanIndexForward: false, // sort descending so most recent first
       };
       if (lek) {
         params.ExclusiveStartKey = {
@@ -110,9 +112,10 @@ app.post("/media/:eventId/photo_mosaic", async function (req, res) {
           message: `Sorry, no profanity is allowed!`,
         });
       } else {
+        const submittedAt = Date.now();
         // get file extension and generate random uuid to prevent collisions/overwrites
         const extension = fileName.split(".").pop().toLowerCase();
-        const imageKey = uuid.v4();
+        const imageKey = `${submittedAt}-${uuid.v4()}`; // include current date timestamp so sortable
 
         // create a presigned url for uploading files
         const fullS3UploadKey = `${process.env.APP_STAGE}/interactive_media/photo_mosaic/${eventId}/upload/${imageKey}.${extension}`;
@@ -128,7 +131,7 @@ app.post("/media/:eventId/photo_mosaic", async function (req, res) {
           Item: {
             event_name: eventId.toLowerCase(), // partition key
             image_key: `image.${imageKey}`, // sort key
-            submission_timestamp: Date.now(),
+            submission_timestamp: submittedAt,
             submitted_by: name ?? "",
             message: message ?? "",
             full_image: `https://${process.env.STATIC_CONTENT_BUCKET}/${process.env.APP_STAGE}/interactive_media/photo_mosaic/${eventId}/processed/${imageKey}-resized.${extension}`,
@@ -163,9 +166,9 @@ app.use((req, res, next) => {
 });
 
 // for local testing
-app.listen(3030, () => {
-  console.log(`Example app listening on port 3030`);
-});
+// app.listen(3030, () => {
+//   console.log(`Example app listening on port 3030`);
+// });
 module.exports.handler = serverless(app);
 
 // ============= HELPERS ==============
