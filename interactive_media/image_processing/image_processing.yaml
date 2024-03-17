@@ -60,6 +60,7 @@ Resources:
                   - dynamodb:*
                 Resource:
                   - Fn::ImportValue: !Sub "${ServerlessStackName}-${DeploymentStage}-InteractiveMediaTableArn"
+                  - Fn::ImportValue: !Sub "${ServerlessStackName}-${DeploymentStage}-EventsTableArn"
         - PolicyName: ImageProcessingLambdaRekognition
           PolicyDocument:
             Version: "2012-10-17"
@@ -95,8 +96,10 @@ Resources:
       MemorySize: 512
       Environment:
         Variables:
-          TABLE_NAME:
+          MEDIA_TABLE:
             Fn::ImportValue: !Sub "${ServerlessStackName}-${DeploymentStage}-InteractiveMediaTableName"
+          EVENTS_TABLE:
+            Fn::ImportValue: !Sub "${ServerlessStackName}-${DeploymentStage}-EventsTableName"
   ImageProcessingPillowLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:

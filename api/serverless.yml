@@ -242,3 +242,13 @@ resources:
       Value: ${self:custom.interactiveMediaTableName}
       Export:
         Name: !Sub "${AWS::StackName}-InteractiveMediaTableName"
+    EventsTableArn:
+      Description: ARN of the events DDB table
+      Value: !Sub "arn:aws:dynamodb:${opt:region, self:provider.region}:${AWS::AccountId}:table/${self:custom.eventsTableName}"
+      Export:
+        Name: !Sub "${AWS::StackName}-EventsTableArn"
+    EventsTableName:
+      Description: Name of the events DDB table
+      Value: ${self:custom.eventsTableName}
+      Export:
+        Name: !Sub "${AWS::StackName}-EventsTableName"

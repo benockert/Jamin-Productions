@@ -10,13 +10,15 @@ import { useLoaderData, useParams, redirect } from "react-router-dom";
 
 export async function submitToPhotoMosaicPageLoader({ params, request }) {
   const eventId = params.eventId;
-  return await getData(`events/${eventId}?type=photomosaic`).then((res) => {
-    if (res.statusCode === 404) {
-      return redirect("/");
-    } else {
-      return res.data ?? {};
+  return await getData(`events/${eventId}?type=photomosaic.form`).then(
+    (res) => {
+      if (res.statusCode === 404) {
+        return redirect("/");
+      } else {
+        return res.data ?? {};
+      }
     }
-  });
+  );
 }
 
 const SubmitToPhotoMosaic = () => {

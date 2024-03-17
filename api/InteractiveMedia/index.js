@@ -52,13 +52,16 @@ app.get("/media/:eventId/photo_mosaic", async function (req, res) {
           "#npk": "event_name",
           "#nsk": "image_key",
           "#n0": "active",
+          "#px": "position_x",
+          "#py": "position_y",
         },
         ExpressionAttributeValues: {
           ":vpk": eventId,
           ":vsk": "image",
           ":v0": true,
         },
-        Select: "ALL_ATTRIBUTES",
+        Select: "SPECIFIC_ATTRIBUTES", // not technically needed since we include ProjectionExpression
+        ProjectionExpression: "full_image,submitted_by,message,#px,#py",
         ScanIndexForward: false, // sort descending so most recent first
       };
       if (lek) {
@@ -166,9 +169,9 @@ app.use((req, res, next) => {
 });
 
 // for local testing
-// app.listen(3030, () => {
-//   console.log(`Example app listening on port 3030`);
-// });
+app.listen(3030, () => {
+  console.log(`Example app listening on port 3030`);
+});
 module.exports.handler = serverless(app);
 
 // ============= HELPERS ==============
