@@ -7,7 +7,6 @@ const {
 } = require("@aws-sdk/lib-dynamodb");
 const express = require("express");
 const serverless = require("serverless-http");
-var request = require("request");
 
 const app = express();
 const client = new DynamoDBClient();
@@ -30,68 +29,6 @@ app.use((req, res, next) => {
 
   // call so continues to routes
   next();
-});
-
-app.get("/events/:eventId", async function (req, res) {
-  try {
-    const eventId = req.params.eventId;
-    const type = req.query.type;
-    if (!eventId) {
-      res.status(404).json({
-        result: "error",
-        message: "Event not found",
-      });
-    } else {
-      // get primary event information
-      const eventPrimaryParms = {
-        TableName: process.env.EVENTS_TABLE,
-        Key: {
-          event_id: `${eventId.toLowerCase()}.primary`,
-        },
-      };
-      const { Item: primary } = await dynamoDbClient.send(
-        new GetCommand(eventPrimaryParms)
-      );
-      if (primary) {
-        const { name, date, brand_color } = primary;
-
-        if (type) {
-          // get secondary event information based on type
-          const secondaryEventParams = {
-            TableName: process.env.EVENTS_TABLE,
-            Key: {
-              event_id: `${eventId.toLowerCase()}.${type}`,
-            },
-          };
-          const { Item: secondary } = await dynamoDbClient.send(
-            new GetCommand(secondaryEventParams)
-          );
-          if (secondary) {
-            res.json({ name, date, brand_color, ...secondary });
-          } else {
-            res.status(404).json({
-              result: "error",
-              message: `Event '${eventId}' does not have a service with type '${type}'`,
-            });
-          }
-        } else {
-          console.log("No type specified");
-          res.json({ name, date });
-        }
-      } else {
-        res.status(404).json({
-          result: "error",
-          message: `Could not find event with id '${eventId}'`,
-        });
-      }
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({
-      result: "error",
-      message: "Could not retreive event information",
-    });
-  }
 });
 
 app.get("/requests/:eventId", async function (req, res) {

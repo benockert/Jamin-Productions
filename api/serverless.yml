@@ -110,6 +110,15 @@ provider:
     disableDefaultEndpoint: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
 
 functions:
+  handleEvents:
+    memorySize: 512
+    timeout: 10
+    name: jp-events-handler-${sls:stage}
+    description: "Handler for event information requests"
+    handler: Events/index.handler
+    events:
+      - httpApi: "GET /events/{eventId}"
+    # role:
   handleRequests:
     memorySize: 512
     timeout: 10
@@ -117,7 +126,6 @@ functions:
     description: "Handler for song request form submissions"
     handler: Requests/index.handler
     events:
-      - httpApi: "GET /events/{eventId}"
       - httpApi: "GET /requests/{eventId}"
       - httpApi: "POST /requests/{eventId}"
     # role:
