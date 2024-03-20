@@ -330,7 +330,7 @@ class RekognitionModerationLabel(RekognitionLabel):
         # self.taxonomy_level = label_obj["TaxonomyLevel"]
 
 # for local testing
-if __name__ == "__main__":
+# if __name__ == "__main__":
 #     logging.basicConfig(
 #         level=logging.INFO,
 #         handlers=[
