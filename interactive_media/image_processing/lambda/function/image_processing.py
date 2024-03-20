@@ -29,8 +29,8 @@ def handler(event, context):
         # assumption is the image submission has been set to inactive in ddb, update to active if the image passes our checks
         if (enabled):
             logger.info("Image passes checks, updating active status in ddb and assigning position in mosaic")
-            mosaic_info = get_event_mosaic_info(ddb_partition_key)
-            position = assign_position(ddb_partition_key, mosaic_info["available_positions"]["L"])
+            mosaic_position_info = get_event_mosaic_position_info(ddb_partition_key)
+            position = assign_position(ddb_partition_key, mosaic_position_info["value"]["L"])
             result = enable_submission_in_ddb(ddb_partition_key, ddb_sort_key, position)
             if (result == 200):
                 logger.info("Successfully updated active status and position of {}".format(ddb_partition_key))
@@ -43,23 +43,21 @@ def handler(event, context):
         logger.exception(e)
         raise e
     
-def get_event_mosaic_info(event_key):
+def get_event_mosaic_position_info(event_key):
     """
-    Gets info about the photo mosaic for the given event
+    Gets information about available positions in the photo mosaic for the given event
     """
     table_name = os.environ["EVENTS_TABLE"]
-    fields_to_return = 'available_positions' # comma-separated list
 
     try:
         mosaic_info = dynamo.get_item(
             TableName=table_name,
             Key={
                 'event_id': {
-                    "S": f"{str(event_key)}.photomosaic",
+                    "S": f"{str(event_key)}.photomosaic.available_positions",
                 }
             },
             ConsistentRead=True, # need strong consistency
-            ProjectionExpression=fields_to_return,
         )
     except ClientError as err:
         logger.error(
@@ -104,8 +102,9 @@ def update_available_positions(event_key, new_positions):
     try:
         dynamo.update_item(
             TableName=table_name,
-            Key={"event_id": {"S": f"{event_key}.photomosaic"}},
-            UpdateExpression="set available_positions=:r",
+            Key={"event_id": {"S": f"{event_key}.photomosaic.available_positions"}},
+            UpdateExpression="set #v=:r",
+            ExpressionAttributeNames={"#v": "value"},
             ExpressionAttributeValues={":r": {"L": new_positions}},
         )
     except ClientError as err:
@@ -354,4 +353,6 @@ if __name__ == "__main__":
 #             logger.error("Unsucessful attempt at updating active status of {}".format(ddb_partition_key))
 #     else:
 #         logger.info("Found inappropriate immage, nothing to update in ddb.")
-    mosaic_info = get_event_mosaic_info("northeastern2024")
+    # mosaic_info = get_event_mosaic_position_info("northeastern2024")
+    # print(mosaic_info)
+    # update_available_positions("northeastern2024", [])
