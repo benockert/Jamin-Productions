@@ -1,8 +1,9 @@
 from PIL import Image
 import math
 from itertools import product
+from PIL import Image, ImageEnhance
 
-def split_image():
+def split_image(offset):
     img = Image.open(image_path)
     width, height = img.size
     print(width, height)
@@ -37,10 +38,27 @@ def split_image():
         print(box)
 
         # print(', '.join([str(g) for g in grid]))
-        img.crop(box).resize((target_tile_width,target_tile_height), Image.ANTIALIAS).save(f'{out_path}/{r}_{c}.jpg', optimize=True, quality=95)
+        # forms into x-idx_y-idx.jpg
+        img.crop(box).resize((target_tile_width,target_tile_height), Image.ANTIALIAS).save(f'{out_path}/{c + offset}_{r + offset}.jpg', optimize=True, quality=95)
+
+    return img, new_height, new_width
+    
+def darken(img, factor):
+    enhancer = ImageEnhance.Brightness(img)
+
+    # to reduce brightness by 50%, use factor 0.5
+    img = enhancer.enhance(factor)
+
+    return img
 
 
 if __name__ == "__main__":
     image_path = "../files/2024-N-CommencementBranding-v5_Page_11.png"
     out_path = "../files/split"
-    split_image()
+
+    offset = 30
+    image, adjusted_height, adjusted_width = split_image(offset)
+
+    cropped_image = image.crop((0,0,adjusted_width,adjusted_height))
+
+    darken(cropped_image, 0.20).save("../files/northeastern2024-bg.jpg")

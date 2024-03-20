@@ -6,3 +6,6 @@ deploy-misc-code-bucket:
 
 add-new-event:
 	cd scripts && ./new_event.bat
+
+sync-tiles:
+	aws s3 cp scripts/files/split s3://static.jaminproductions.com/dev/interactive_media/photo_mosaic/northeastern2024/tiles/32x18 --recursive
