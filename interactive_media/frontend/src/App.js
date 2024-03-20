@@ -3,7 +3,7 @@ import {
   RouterProvider,
   redirect,
 } from "react-router-dom";
-import Mosaic, { mosaicLoader } from "./Viewers/Mosaic";
+import Mosaic, { mosaicLoader } from "./Views/Mosaic";
 
 function App() {
   const router = createBrowserRouter([
