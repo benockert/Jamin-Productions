@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { getData } from "../api";
 import { useLoaderData, useParams, redirect } from "react-router-dom";
 
@@ -36,7 +36,9 @@ const Mosaic = () => {
   console.log(images);
   return (
     <div className="container">
-      <Tiles
+      <FlipLayer data={images} />
+      <BorderLayer />
+      <TilesLayer
         className="tiles"
         data={images}
         rows={event.rows}
@@ -45,8 +47,8 @@ const Mosaic = () => {
         width={event.width}
         offset={event.offset}
       />
-      <BottomLayer
-        className="bottom"
+      <BackgroundLayer
+        className="background"
         src={event.fill_image}
         height={event.height}
         width={event.width}
@@ -57,63 +59,89 @@ const Mosaic = () => {
   );
 };
 
-const Tiles = (props) => {
-  const canvasRef = useRef(null);
+const FlipLayer = (props) => {
+  useEffect(() => {
+    setTimeout(() => {
+      const items = props.data.items;
+
+      const image = items[Math.floor(Math.random() * items.length)];
+      const domObject = document.getElementById(
+        `tile-${image.position_y}-${image.position_x}`
+      );
+
+      domObject.classList.add("tile-flipped");
+    }, 2000);
+  }, []);
+};
+
+const BorderLayer = (props) => {};
+
+const TilesLayer = (props) => {
+  const [tiles, setTiles] = useState([]);
+  const scale = props.width / props.cols;
   const tilePrefix =
     "https://static.jaminproductions.com/dev/interactive_media/photo_mosaic/northeastern2024/tiles";
 
+  const handleImageLoad = (event, delay) => {
+    console.log("Loaded");
+    console.log({ event });
+    setTimeout(() => {
+      event.target.style.opacity = 1;
+      event.target.style.scale = 1;
+    }, delay * 20);
+    // todo: make time some formula based on number of tiles
+  };
+
+  const createTile = (image, index) => {
+    const style = {
+      height: scale,
+      width: scale,
+      left: parseInt((image.position_x - props.offset) * scale, 10),
+      top: parseInt((image.position_y - props.offset) * scale, 10),
+    };
+
+    return (
+      <div
+        className="tile"
+        id={`tile-${image.position_y}-${image.position_x}`}
+        style={style}
+        key={`${image.position_y}-${image.position_x}`}
+      >
+        <img
+          className="tile-front tile-fade"
+          onLoad={(event) => handleImageLoad(event, index)}
+          src={`${tilePrefix}/${props.cols}x${props.rows}/${image.position_x}_${image.position_y}.jpg`}
+        ></img>
+        <div className="tile-back">
+          <img className="tile-image" src={image.full_image}></img>
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas.getContext("2d");
-
-    const scale = props.width / props.cols; // todo set this in tile split script and use here
-    console.log({ scale });
-
-    props.data.items.forEach((image, idx) => {
-      const img = new Image();
-      const imgName = `tile${idx}`; // todo consider returning image key and using as name
-
-      img.onload = () => {
-        // draw tile image
-        context.drawImage(
-          img,
-          (image.position_x - props.offset) * scale,
-          (image.position_y - props.offset) * scale,
-          scale,
-          scale
-        );
-      };
-
-      console.log({
-        row: image.position_y,
-        col: image.position_x,
-        x: (image.position_x - props.offset) * scale,
-        y: (image.position_y - props.offset) * scale,
-        src: `${tilePrefix}/${props.cols}x${props.rows}/${image.position_x}_${image.position_y}.jpg`,
-      });
-
-      img.src = `${tilePrefix}/${props.cols}x${props.rows}/${image.position_x}_${image.position_y}.jpg`;
+    const imageElements = props.data.items.map((image, idx) => {
+      return createTile(image, idx);
     });
+    console.log({ imageElements });
+    setTiles(imageElements);
   }, []);
 
   return (
-    <canvas
-      className="tiles"
-      ref={canvasRef}
-      width={props.width}
-      height={props.height}
-    />
+    <div className="tiles" style={{ width: props.width, height: props.height }}>
+      {tiles}
+    </div>
   );
 };
 
-const BottomLayer = (props) => {
+// The bottom layer of the mosaic, which will be a "transparent" background image or color
+const BackgroundLayer = (props) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
     const img = new Image();
-    const imgName = "background-fill-image";
 
     img.onload = () => {
       // draw tile image
