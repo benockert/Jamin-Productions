@@ -18,10 +18,10 @@ const TilesLayer = (props) => {
 
   const createTile = (image, index) => {
     const style = {
-      height: scaleY,
-      width: scaleX,
-      left: parseInt((image.position_x - props.offset) * scaleX, 10),
-      top: parseInt((image.position_y - props.offset) * scaleY, 10),
+      height: scaleY + 0.1,
+      width: scaleX + 0.1,
+      left: parseInt(image.position_x - props.offset, 10) * scaleX + 0.1,
+      top: parseInt(image.position_y - props.offset, 10) * scaleY + 0.1,
     };
 
     return (
