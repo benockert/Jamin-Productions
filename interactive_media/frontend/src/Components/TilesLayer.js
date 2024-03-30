@@ -1,0 +1,60 @@
+import React, { useEffect, useState } from "react";
+import "./TilesLayer.css";
+
+const TilesLayer = (props) => {
+  const [tiles, setTiles] = useState([]);
+  const scale = props.width / props.cols;
+  // how many milliseconds we want each photo to take to load in
+  const delay = 20;
+
+  const handleImageLoad = (event, index) => {
+    const wait = delay * index;
+    setTimeout(() => {
+      event.target.style.opacity = 1;
+      event.target.style.scale = 1;
+    }, wait);
+  };
+
+  const createTile = (image, index) => {
+    const style = {
+      height: scale,
+      width: scale,
+      left: parseInt((image.position_x - props.offset) * scale, 10),
+      top: parseInt((image.position_y - props.offset) * scale, 10),
+    };
+
+    return (
+      <div
+        className="tile"
+        id={`tile-${image.position_y}-${image.position_x}`}
+        style={style}
+        key={`${image.position_y}-${image.position_x}`}
+      >
+        <img
+          className="tile-front tile-fade"
+          onLoad={(event) => handleImageLoad(event, index)}
+          src={`${props.tilesPrefix}/${props.cols}x${props.rows}/${image.position_x}_${image.position_y}.jpg`}
+        ></img>
+        <div className="tile-back">
+          <img className="tile-image" src={image.full_image}></img>
+        </div>
+      </div>
+    );
+  };
+
+  useEffect(() => {
+    const imageElements = props.data.items.map((image, idx) => {
+      return createTile(image, idx);
+    });
+    console.log({ imageElements });
+    setTiles(imageElements);
+  }, []);
+
+  return (
+    <div className="tiles" style={{ width: props.width, height: props.height }}>
+      {tiles}
+    </div>
+  );
+};
+
+export default TilesLayer;
