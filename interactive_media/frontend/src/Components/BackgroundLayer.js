@@ -11,14 +11,18 @@ const BackgroundLayer = (props) => {
     const img = new Image();
 
     img.onload = () => {
-      // draw background image
-      context.drawImage(img, props.x, props.y, props.width, props.height);
+      // draw background image to fill screen
+      context.drawImage(img, 0, 0, props.width, props.height);
     };
 
     img.src = props.src;
   }, []);
 
-  return <canvas ref={canvasRef} width={props.width} height={props.height} />;
+  return (
+    <div className="background">
+      <canvas ref={canvasRef} width={props.width} height={props.height} />
+    </div>
+  );
 };
 
 export default BackgroundLayer;

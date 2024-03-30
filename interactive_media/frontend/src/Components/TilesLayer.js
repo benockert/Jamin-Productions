@@ -3,7 +3,8 @@ import "./TilesLayer.css";
 
 const TilesLayer = (props) => {
   const [tiles, setTiles] = useState([]);
-  const scale = props.width / props.cols;
+  const scaleX = (props.width / props.cols) * props.scaleX;
+  const scaleY = (props.height / props.rows) * props.scaleY;
   // how many milliseconds we want each photo to take to load in
   const delay = 20;
 
@@ -17,10 +18,10 @@ const TilesLayer = (props) => {
 
   const createTile = (image, index) => {
     const style = {
-      height: scale,
-      width: scale,
-      left: parseInt((image.position_x - props.offset) * scale, 10),
-      top: parseInt((image.position_y - props.offset) * scale, 10),
+      height: scaleY,
+      width: scaleX,
+      left: parseInt((image.position_x - props.offset) * scaleX, 10),
+      top: parseInt((image.position_y - props.offset) * scaleY, 10),
     };
 
     return (
@@ -50,11 +51,7 @@ const TilesLayer = (props) => {
     setTiles(imageElements);
   }, []);
 
-  return (
-    <div className="tiles" style={{ width: props.width, height: props.height }}>
-      {tiles}
-    </div>
-  );
+  return <>{tiles}</>;
 };
 
 export default TilesLayer;

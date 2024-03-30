@@ -1,0 +1,47 @@
+<html lang="en">
+  <head> </head>
+  <style>
+    body {
+      margin: 0px;
+    }
+
+    .custom {
+      width: 70%;
+    }
+
+    .interactive-media-container {
+      margin-left: auto;
+      margin-right: auto;
+      display: table;
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      padding-top: 56.25%;
+    }
+    .interactive-media-iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
+
+  <body>
+    <!-- the width of this div (parent element of the iframe div, is what will set the size) -->
+    <div class="custom">
+      <!-- Below this line is what a client would embed in their site -->
+      <div class="interactive-media-container">
+        <iframe
+          class="interactive-media-iframe"
+          src="http://localhost:3000/mosaic/northeastern2024"
+          title="Mosaic"
+        ></iframe>
+      </div>
+      <!-- Above this line is what a client would embed in their site -->
+    </div>
+  </body>
+</html>

@@ -40,8 +40,19 @@ const Mosaic = () => {
 
   console.log({ event });
   console.log({ images });
+
+  // determine window size
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  // determine width and height scale compared to window size
+  const widthScale = screenWidth / event.width;
+  const heightScale = screenHeight / event.height;
+
+  console.log({ widthScale, heightScale });
+
   return (
-    <div className="container">
+    <div>
       <FlipLayer data={images} />
       <BorderLayer />
       <TilesLayer
@@ -51,16 +62,16 @@ const Mosaic = () => {
         cols={event.cols}
         height={event.height}
         width={event.width}
+        scaleY={heightScale}
+        scaleX={widthScale}
         offset={event.offset}
         tilesPrefix={event.tiles_prefix}
       />
       <BackgroundLayer
         className="background"
         src={event.fill_image}
-        height={event.height}
-        width={event.width}
-        x={0}
-        y={0}
+        width={screenWidth}
+        height={screenHeight}
       />
     </div>
   );
