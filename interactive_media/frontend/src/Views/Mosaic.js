@@ -49,12 +49,41 @@ const Mosaic = () => {
   const widthScale = screenWidth / event.width;
   const heightScale = screenHeight / event.height;
 
-  console.log({ widthScale, heightScale });
+  // determine the height and width of each tile
+  const tileWidth = screenWidth / event.cols;
+  const tileHeight = screenHeight / event.rows;
+
+  // determine left and top position for flipping cards to end at the center
+  const centerLeft = screenWidth / 2 - tileWidth / 2;
+  const centerTop = screenHeight / 2 - tileHeight / 2;
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      console.log("Interval firing");
+      setActiveTile(
+        images.items[Math.floor(Math.random() * images.items.length)]
+      );
+    }, 8000);
+
+    // once to start
+    setActiveTile(
+      images.items[Math.floor(Math.random() * images.items.length)]
+    );
+
+    // clear on dismount
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div>
-      <FlipLayer data={images} />
-      <BorderLayer />
+      {activeTile && (
+        <FlipLayer
+          tile={activeTile}
+          endingLeft={centerLeft}
+          endingTop={centerTop}
+        />
+      )}
+      {/* <BorderLayer /> */}
       <TilesLayer
         className="tiles"
         data={images}

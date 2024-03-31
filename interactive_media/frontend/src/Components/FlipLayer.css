@@ -1,5 +1,5 @@
-/* Flip the tile, increase the scale, and bring in front of everything else */
+/* Flip the tile and bring in front of everything else */
 .tile-flipped {
     z-index: 10000 !important;
-    transform: rotateY(180deg) scale(6);
+    transform: rotateY(180deg);
 }
