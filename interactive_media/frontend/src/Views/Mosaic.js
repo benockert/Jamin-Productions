@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getData } from "../api";
-import { useLoaderData, redirect } from "react-router-dom";
+import { getData, getMedia } from "../api";
+import { useLoaderData, useParams, redirect } from "react-router-dom";
 import FlipLayer from "../Components/FlipLayer";
 import BackgroundLayer from "../Components/BackgroundLayer";
 import TilesLayer from "../Components/TilesLayer";
-import BorderLayer from "../Components/BorderLayer";
 
 import "./Mosaic.css";
 
@@ -24,22 +23,22 @@ export const mosaicLoader = async ({ params, request }) => {
   );
 
   // get image data
-  const image_data = await getData(`/media/${eventId}/photo_mosaic`).then(
-    (res) => {
-      // todo handle additional pages
-      return res.data ?? [];
-    }
-  );
-
-  console.log({ event_info });
-  console.log({ image_data });
+  const image_data = await getMedia(
+    `/media/${eventId}/photo_mosaic?pageSize=50`
+  ).then((res) => {
+    return res.data ?? {};
+  });
 
   return { event: event_info, images: image_data };
 };
 
 const Mosaic = () => {
+  const { eventId } = useParams();
   const { event, images } = useLoaderData();
+  const [loadTime, setLoadTime] = useState(Date.now() - 2000); // loadTime will be used in requests for new data, 2 second buffer in case someone submits at same time as load
+  const [tiles, setTiles] = useState(images); // start out with our initial loaded images
   const [activeTile, setActiveTile] = useState({});
+  const [flipQueue, setFlipQueue] = useState([]);
   const [backgroundLoaded, setBackgroundLoaded] = useState(false);
 
   // determine window size
@@ -59,22 +58,53 @@ const Mosaic = () => {
   const centerTop = screenHeight / 2 - tileHeight / 2;
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      // get the next random index, make sure isn't the same as the current
-      let nextIndex = Math.floor(Math.random() * images.items.length);
-      setActiveTile({ index: nextIndex, tile: images.items[nextIndex] });
+    let iteration = 0;
+    const interval = setInterval(async () => {
+      if (!!flipQueue.length) {
+        // if we have a queue here, it means the first element has already been flipped so we want to remove it in order
+        // to rerender with the updated queue and start a new interval
+        setFlipQueue(flipQueue.slice(1));
+      } else {
+        // if we are here, the queue is cleared, if a certain multiple, check for new content and set flip queue again, else get the next tile randomly
+        // TODO: cleanup and make simpler
+        if (iteration % 5 === 0) {
+          const new_image_data = await getData(
+            `/media/${eventId}/photo_mosaic?since=${loadTime}`
+          ).then((res) => {
+            return res.data.items;
+          });
+
+          if (!!new_image_data.length) {
+            setTiles({ ...tiles, items: tiles.items.concat(new_image_data) });
+            setFlipQueue(new_image_data);
+            const t = { ...tiles, items: tiles.items.concat(new_image_data) };
+            setLoadTime(Date.now() - 2000);
+          } else {
+            let nextIndex = Math.floor(Math.random() * tiles.items.length);
+            setActiveTile({ index: nextIndex, tile: tiles.items[nextIndex] });
+          }
+        } else {
+          let nextIndex = Math.floor(Math.random() * tiles.items.length);
+          setActiveTile({ index: nextIndex, tile: tiles.items[nextIndex] });
+        }
+      }
+      iteration += 1;
     }, 8000);
 
-    // once to start
-    const startingIndex = Math.floor(Math.random() * images.items.length);
-    setActiveTile({
-      index: startingIndex,
-      tile: images.items[startingIndex],
-    });
+    // once to start, pull from top of our queue, otherwise choose randomly
+    if (!!flipQueue.length) {
+      setActiveTile({ index: -1, tile: flipQueue[0] });
+    } else {
+      const startingIndex = Math.floor(Math.random() * tiles.items.length);
+      setActiveTile({
+        index: startingIndex,
+        tile: tiles.items[startingIndex],
+      });
+    }
 
     // clear on dismount
     return () => clearInterval(interval);
-  }, []);
+  }, [flipQueue]);
 
   const onBackgroundLoad = (className) => {
     document.getElementsByClassName(className)[0].style.opacity = 1;
@@ -94,7 +124,7 @@ const Mosaic = () => {
           )}
           {/* <BorderLayer /> */}
           <TilesLayer
-            data={images}
+            data={tiles}
             rows={event.rows}
             cols={event.cols}
             height={event.height}

@@ -12,3 +12,24 @@ export async function getData(path) {
     return {};
   }
 }
+
+export async function getMedia(path, lek = "") {
+  try {
+    const fullPath = lek ? `${path}&lek=${lek}` : path;
+    return await getData(fullPath).then(async (res) => {
+      // check for a key that signifies there are more items to fetch
+      if (!!res.data?.lek) {
+        const rest = await getMedia(path, res.data.lek);
+        return {
+          ...res,
+          data: { items: res.data.items.concat(rest.data.items) },
+        };
+      } else {
+        return res;
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}

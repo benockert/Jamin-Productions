@@ -63,7 +63,7 @@ const TilesLayer = (props) => {
       return createTile(image, idx);
     });
     setTiles(imageElements);
-  }, []);
+  }, [props.data]); // refresh when new tiles are added
 
   return <>{tiles}</>;
 };
