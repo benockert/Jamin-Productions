@@ -17,6 +17,13 @@ const TilesLayer = (props) => {
   };
 
   const createTile = (image, index) => {
+    const hasMessage = !!image.message;
+
+    // determine font sizing and spacing based on message length
+    const wrappedLines = (image.message?.length ?? 0) > 25;
+    const extraWrap = (image.message?.length ?? 0) > 63;
+    const fontSize = extraWrap ? "0.17vw" : wrappedLines ? "0.2vw" : "0.24vw";
+
     const style = {
       height: scaleY + 0.1,
       width: scaleX + 0.1,
@@ -37,7 +44,15 @@ const TilesLayer = (props) => {
           src={`${props.tilesPrefix}/${props.cols}x${props.rows}/${image.position_x}_${image.position_y}.jpg`}
         ></img>
         <div className="tile-back">
-          <img className="tile-image" src={image.full_image}></img>
+          <img
+            className={hasMessage ? "tile-image-message" : "tile-image"}
+            src={image.full_image}
+          ></img>
+          {hasMessage && (
+            <div style={{ fontSize: fontSize }} className="tile-caption">
+              {image.message}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -47,7 +62,6 @@ const TilesLayer = (props) => {
     const imageElements = props.data.items.map((image, idx) => {
       return createTile(image, idx);
     });
-    console.log({ imageElements });
     setTiles(imageElements);
   }, []);
 

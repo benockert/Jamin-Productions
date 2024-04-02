@@ -13,6 +13,7 @@ const BackgroundLayer = (props) => {
     img.onload = () => {
       // draw background image to fill screen
       context.drawImage(img, 0, 0, props.width, props.height);
+      props.onLoad("background");
     };
 
     img.src = props.src;

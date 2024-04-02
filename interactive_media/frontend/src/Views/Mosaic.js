@@ -31,15 +31,16 @@ export const mosaicLoader = async ({ params, request }) => {
     }
   );
 
+  console.log({ event_info });
+  console.log({ image_data });
+
   return { event: event_info, images: image_data };
 };
 
 const Mosaic = () => {
   const { event, images } = useLoaderData();
-  const [activeTile, setActiveTile] = useState();
-
-  console.log({ event });
-  console.log({ images });
+  const [activeTile, setActiveTile] = useState({});
+  const [backgroundLoaded, setBackgroundLoaded] = useState(false);
 
   // determine window size
   const screenWidth = window.innerWidth;
@@ -59,48 +60,57 @@ const Mosaic = () => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      console.log("Interval firing");
-      setActiveTile(
-        images.items[Math.floor(Math.random() * images.items.length)]
-      );
+      // get the next random index, make sure isn't the same as the current
+      let nextIndex = Math.floor(Math.random() * images.items.length);
+      setActiveTile({ index: nextIndex, tile: images.items[nextIndex] });
     }, 8000);
 
     // once to start
-    setActiveTile(
-      images.items[Math.floor(Math.random() * images.items.length)]
-    );
+    const startingIndex = Math.floor(Math.random() * images.items.length);
+    setActiveTile({
+      index: startingIndex,
+      tile: images.items[startingIndex],
+    });
 
     // clear on dismount
     return () => clearInterval(interval);
   }, []);
 
+  const onBackgroundLoad = (className) => {
+    document.getElementsByClassName(className)[0].style.opacity = 1;
+    setBackgroundLoaded(true);
+  };
+
   return (
     <div>
-      {activeTile && (
-        <FlipLayer
-          tile={activeTile}
-          endingLeft={centerLeft}
-          endingTop={centerTop}
-        />
+      {backgroundLoaded && (
+        <>
+          {activeTile.tile && (
+            <FlipLayer
+              tile={activeTile.tile}
+              endingLeft={centerLeft}
+              endingTop={centerTop}
+            />
+          )}
+          {/* <BorderLayer /> */}
+          <TilesLayer
+            data={images}
+            rows={event.rows}
+            cols={event.cols}
+            height={event.height}
+            width={event.width}
+            scaleY={heightScale}
+            scaleX={widthScale}
+            offset={event.offset}
+            tilesPrefix={event.tiles_prefix}
+          />
+        </>
       )}
-      {/* <BorderLayer /> */}
-      <TilesLayer
-        className="tiles"
-        data={images}
-        rows={event.rows}
-        cols={event.cols}
-        height={event.height}
-        width={event.width}
-        scaleY={heightScale}
-        scaleX={widthScale}
-        offset={event.offset}
-        tilesPrefix={event.tiles_prefix}
-      />
       <BackgroundLayer
-        className="background"
         src={event.fill_image}
         width={screenWidth}
         height={screenHeight}
+        onLoad={onBackgroundLoad}
       />
     </div>
   );

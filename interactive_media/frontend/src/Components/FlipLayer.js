@@ -16,12 +16,12 @@ const FlipLayer = (props) => {
       // move card to ending position on screen and scale it up
       domObject.style.left = `${props.endingLeft}px`;
       domObject.style.top = `${props.endingTop}px`;
-      domObject.style.scale = 6;
+      domObject.style.scale = 9;
 
       // start flip animation
       domObject.classList.add("tile-flipped");
 
-      // return to original position and scale after delay
+      // // return to original position and scale after delay
       setTimeout(() => {
         domObject.classList.remove("tile-flipped");
 
