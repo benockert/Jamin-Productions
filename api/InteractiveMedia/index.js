@@ -36,6 +36,7 @@ app.get("/media/:eventId/photo_mosaic", async function (req, res) {
     const eventId = req.params.eventId;
     const pageSize = req.query.pageSize ?? 50; // default to max
     const lek = req.query.lek; // last evaluated sort key, we know the partition key from the eventId
+    const since = req.query.since;
     if (!eventId) {
       res.status(404).json({
         result: "error",
@@ -46,7 +47,7 @@ app.get("/media/:eventId/photo_mosaic", async function (req, res) {
       const params = {
         TableName: process.env.INTERACTIVE_MEDIA_TABLE,
         Limit: Number(pageSize),
-        KeyConditionExpression: "#npk = :vpk AND begins_with(#nsk, :vsk)",
+        KeyConditionExpression: "#npk = :vpk AND #nsk >= :vsk",
         FilterExpression: "#n0 = :v0",
         ExpressionAttributeNames: {
           "#npk": "event_name",
@@ -57,7 +58,7 @@ app.get("/media/:eventId/photo_mosaic", async function (req, res) {
         },
         ExpressionAttributeValues: {
           ":vpk": eventId,
-          ":vsk": "image",
+          ":vsk": `image.${since ?? 0}`,
           ":v0": true,
         },
         Select: "SPECIFIC_ATTRIBUTES", // not technically needed since we include ProjectionExpression
