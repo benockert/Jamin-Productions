@@ -108,6 +108,11 @@ app.post("/media/:eventId/photo_mosaic", async function (req, res) {
         result: "error",
         message: errorMessage + "(field: message)",
       });
+    } else if (typeof fileName !== "string") {
+      res.status(400).json({
+        result: "error",
+        message: errorMessage + "(field: file name)",
+      });
     } else {
       // check for profanity
       if (containsProfanity(name, message)) {
@@ -170,9 +175,9 @@ app.use((req, res, next) => {
 });
 
 // for local testing
-app.listen(3030, () => {
-  console.log(`Example app listening on port 3030`);
-});
+// app.listen(3030, () => {
+//   console.log(`Example app listening on port 3030`);
+// });
 module.exports.handler = serverless(app);
 
 // ============= HELPERS ==============
@@ -200,7 +205,7 @@ const createPresignedUrlWithoutClient = async (key, fileType) => {
 };
 
 const containsProfanity = (name, message) => {
-  // from https://www.cs.cmu.edu/~biglou/resources/bad-words.txt
+  // mostly from https://www.cs.cmu.edu/~biglou/resources/bad-words.txt
   // document.body.getElementsByTagName("pre")[0].textContent.split("\n")
   const blocked = [
     "abbo",
@@ -568,6 +573,7 @@ const containsProfanity = (name, message) => {
     "dragqween",
     "dripdick",
     "drug",
+    "drugs",
     "drunk",
     "drunken",
     "dumb",
@@ -1586,6 +1592,28 @@ const containsProfanity = (name, message) => {
     "yellowman",
     "zigabo",
     "zipperhead",
+    "fck",
+    "sht",
+    "btch",
+    "ngga",
+    "bstrd",
+    "bullsht",
+    "shthed",
+    "shthd",
+    "hate",
+    "hated",
+    "trump",
+    "biden",
+    "maga",
+    "klux",
+    "supremacy",
+    "fug",
+    "fugg",
+    "bllsht",
+    "feck",
+    "fahk",
+    "fick",
+    "a$$",
   ];
 
   name_tokens = name.toLowerCase().split(" ");
@@ -1612,5 +1640,11 @@ const containsProfanity = (name, message) => {
     return false;
   });
 
-  return anyMatched || anyInBlob;
+  // check for patterns of suspcious text i.e. replacing special characters for vowels in swears
+  // matches words with characters wrapping special characters on both ends
+  // excluded characters: '-
+  const re = new RegExp(/^.*\S+[!@#$%^&*()_+\=\[\]{};:"\\|,.<>\/?]+\S+.*$/);
+  const matches = re.exec(`${name} ${message}`);
+
+  return anyMatched || anyInBlob || !!matches;
 };
