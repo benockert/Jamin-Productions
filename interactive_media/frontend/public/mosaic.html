@@ -50,9 +50,9 @@
       const searchParams = new URLSearchParams(window.location.search);
       let frameWidth = parseInt(searchParams.get("width"), 10);
 
-      // don't allow more than 100
+      // don't allow more than 100 or less than 50
       frameWidth = Math.min(frameWidth, 100);
-      if (0 < frameWidth < 100) {
+      if (50 < frameWidth < 100) {
         document.getElementsByClassName(
           "custom"
         )[0].style.width = `${frameWidth}%`;
