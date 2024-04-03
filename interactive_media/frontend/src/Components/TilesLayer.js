@@ -37,6 +37,7 @@ const TilesLayer = (props) => {
         id={`tile-${image.position_y}-${image.position_x}`}
         style={style}
         key={`${image.position_y}-${image.position_x}`}
+        alt=""
       >
         <img
           className="tile-front tile-fade"
@@ -47,6 +48,7 @@ const TilesLayer = (props) => {
           <img
             className={hasMessage ? "tile-image-message" : "tile-image"}
             src={image.full_image}
+            alt=""
           ></img>
           {hasMessage && (
             <div style={{ fontSize: fontSize }} className="tile-caption">

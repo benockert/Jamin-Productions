@@ -6,7 +6,7 @@
     }
 
     .custom {
-      width: 70%;
+      width: 75%;
     }
 
     .interactive-media-container {
@@ -37,11 +37,27 @@
       <div class="interactive-media-container">
         <iframe
           class="interactive-media-iframe"
-          src="http://localhost:3000/mosaic/northeastern2024"
+          src="https://media.jaminproductions.com/mosaic/northeastern2024"
           title="Mosaic"
         ></iframe>
       </div>
       <!-- Above this line is what a client would embed in their site -->
     </div>
+
+    <!-- TEMP: update mosaic width based on query params for demo purposes  -->
+    <script>
+      // get search param for width
+      const searchParams = new URLSearchParams(window.location.search);
+      let frameWidth = parseInt(searchParams.get("width"), 10);
+
+      // don't allow more than 100
+      frameWidth = Math.min(frameWidth, 100);
+      if (0 < frameWidth < 100) {
+        document.getElementsByClassName(
+          "custom"
+        )[0].style.width = `${frameWidth}%`;
+      }
+      // else whatever value is currently set for width in the 'custom' class CSS props will be used
+    </script>
   </body>
 </html>

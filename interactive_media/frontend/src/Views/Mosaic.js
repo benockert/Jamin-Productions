@@ -77,7 +77,6 @@ const Mosaic = () => {
           if (!!new_image_data.length) {
             setTiles({ ...tiles, items: tiles.items.concat(new_image_data) });
             setFlipQueue(new_image_data);
-            const t = { ...tiles, items: tiles.items.concat(new_image_data) };
             setLoadTime(Date.now() - 2000);
           } else {
             let nextIndex = Math.floor(Math.random() * tiles.items.length);
