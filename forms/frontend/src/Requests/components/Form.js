@@ -77,7 +77,7 @@ export const Form = ({
           error={formik.touched.artist && Boolean(formik.errors.artist)}
           helperText={formik.touched.artist && formik.errors.artist}
         />
-        <TextField
+        {/* <TextField
           fullWidth
           className="form-field"
           id="form-name"
@@ -102,7 +102,7 @@ export const Form = ({
           onBlur={formik.handleBlur}
           error={formik.touched.notes && Boolean(formik.errors.notes)}
           helperText={formik.touched.notes && formik.errors.notes}
-        />
+        /> */}
         <Button
           color="primary"
           variant="contained"
