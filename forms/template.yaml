@@ -4,7 +4,7 @@ Description: SAM Template for React app hosted with S3 and CloudFront - intended
 Parameters:
   DomainName:
     Type: String
-    Description: Domain name for accessing forms app
+    Description: Domain name for accessing the built React app
     Default: forms.jaminproductions.com
   JaminProductionsHostedZoneId:
     Type: String
@@ -42,7 +42,7 @@ Resources:
     Properties:
       OriginAccessControlConfig:
         Name: !Sub "${DomainName}.s3.us-east-1.amazonaws.com"
-        Description: "Origin access control for forms.jaminprodcutions.com"
+        Description: !Sub "Origin access control for ${DomainName}"
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -50,7 +50,7 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        Comment: "Distribution for 'Jamin Productions forms submission site"
+        Comment: !Sub "Distribution for ${DomainName}"
         Origins:
           - DomainName: !GetAtt ReactAppS3Bucket.RegionalDomainName
             Id: !Sub "${DomainName}-react-app-s3-origin"
@@ -69,7 +69,6 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
         Aliases:
           - !Ref DomainName
-          - requests.jaminproductions.com
         PriceClass: PriceClass_100
         CustomErrorResponses:
           - ErrorCode: 404
@@ -82,21 +81,11 @@ Resources:
           AcmCertificateArn: arn:aws:acm:us-east-1:783358359740:certificate/352b4616-b73c-4d83-acc4-0c8451383464
           MinimumProtocolVersion: TLSv1.2_2021
           SslSupportMethod: sni-only
-  FormsSiteDNSRecord:
+  ReactSiteDNSRecord:
     Type: AWS::Route53::RecordSet
     Properties:
       HostedZoneId: !Ref JaminProductionsHostedZoneId
       Name: !Ref DomainName
-      AliasTarget:
-        DNSName: !GetAtt CloudFrontDistribution.DomainName
-        HostedZoneId: Z2FDTNDATAQYW2
-      Type: A
-  # this replaces requests.jaminproductions.com, so map it to the same distribution
-  RequestsSiteDNSMapping:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      HostedZoneId: !Ref JaminProductionsHostedZoneId
-      Name: requests.jaminproductions.com
       AliasTarget:
         DNSName: !GetAtt CloudFrontDistribution.DomainName
         HostedZoneId: Z2FDTNDATAQYW2
