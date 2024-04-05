@@ -33,29 +33,56 @@ export const mosaicLoader = async ({ params, request }) => {
 };
 
 const Mosaic = () => {
-  const { eventId } = useParams();
   const { event, images } = useLoaderData();
-  const [loadTime, setLoadTime] = useState(Date.now() - 2000); // loadTime will be used in requests for new data, 2 second buffer in case someone submits at same time as load
-  const [tiles, setTiles] = useState(images); // start out with our initial loaded images
-  const [activeTile, setActiveTile] = useState({});
-  const [flipQueue, setFlipQueue] = useState([]);
   const [backgroundLoaded, setBackgroundLoaded] = useState(false);
 
   // determine window size
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
+  const onBackgroundLoad = (className) => {
+    document.getElementsByClassName(className)[0].style.opacity = 1;
+    setBackgroundLoaded(true);
+  };
+
+  return (
+    <>
+      {backgroundLoaded && (
+        <MainLayers
+          event={event}
+          images={images}
+          width={screenWidth}
+          height={screenHeight}
+        ></MainLayers>
+      )}
+      <BackgroundLayer
+        src={event.fill_image}
+        width={screenWidth}
+        height={screenHeight}
+        onLoad={onBackgroundLoad}
+      />
+    </>
+  );
+};
+
+const MainLayers = ({ event, images, width, height }) => {
+  const { eventId } = useParams();
+  const [loadTime, setLoadTime] = useState(Date.now() - 2000); // loadTime will be used in requests for new data, 2 second buffer in case someone submits at same time as load
+  const [tiles, setTiles] = useState(images); // start out with our initial loaded images
+  const [activeTile, setActiveTile] = useState({});
+  const [flipQueue, setFlipQueue] = useState([]);
+
   // determine width and height scale compared to window size
-  const widthScale = screenWidth / event.width;
-  const heightScale = screenHeight / event.height;
+  const widthScale = width / event.width;
+  const heightScale = height / event.height;
 
   // determine the height and width of each tile
-  const tileWidth = screenWidth / event.cols;
-  const tileHeight = screenHeight / event.rows;
+  const tileWidth = width / event.cols;
+  const tileHeight = height / event.rows;
 
   // determine left and top position for flipping cards to end at the center
-  const centerLeft = screenWidth / 2 - tileWidth / 2;
-  const centerTop = screenHeight / 2 - tileHeight / 2;
+  const centerLeft = width / 2 - tileWidth / 2;
+  const centerTop = height / 2 - tileHeight / 2;
 
   useEffect(() => {
     let iteration = 0;
@@ -105,43 +132,28 @@ const Mosaic = () => {
     return () => clearInterval(interval);
   }, [flipQueue]);
 
-  const onBackgroundLoad = (className) => {
-    document.getElementsByClassName(className)[0].style.opacity = 1;
-    setBackgroundLoaded(true);
-  };
-
   return (
-    <div>
-      {backgroundLoaded && (
-        <>
-          {activeTile.tile && (
-            <FlipLayer
-              tile={activeTile.tile}
-              endingLeft={centerLeft}
-              endingTop={centerTop}
-            />
-          )}
-          {/* <BorderLayer /> */}
-          <TilesLayer
-            data={tiles}
-            rows={event.rows}
-            cols={event.cols}
-            height={event.height}
-            width={event.width}
-            scaleY={heightScale}
-            scaleX={widthScale}
-            offset={event.offset}
-            tilesPrefix={event.tiles_prefix}
-          />
-        </>
+    <>
+      {activeTile.tile && (
+        <FlipLayer
+          tile={activeTile.tile}
+          endingLeft={centerLeft}
+          endingTop={centerTop}
+        />
       )}
-      <BackgroundLayer
-        src={event.fill_image}
-        width={screenWidth}
-        height={screenHeight}
-        onLoad={onBackgroundLoad}
+      {/* <BorderLayer /> */}
+      <TilesLayer
+        data={tiles}
+        rows={event.rows}
+        cols={event.cols}
+        height={event.height}
+        width={event.width}
+        scaleY={heightScale}
+        scaleX={widthScale}
+        offset={event.offset}
+        tilesPrefix={event.tiles_prefix}
       />
-    </div>
+    </>
   );
 };
 
