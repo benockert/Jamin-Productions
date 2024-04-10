@@ -24,7 +24,7 @@ export const mosaicLoader = async ({ params, request }) => {
 
   // get image data
   const image_data = await getMedia(
-    `/media/${eventId}/photo_mosaic?pageSize=50`
+    `media/${eventId}/photo_mosaic?pageSize=50`
   ).then((res) => {
     return res.data ?? {};
   });
@@ -96,7 +96,7 @@ const MainLayers = ({ event, images, width, height }) => {
         // TODO: cleanup and make simpler
         if (iteration % 5 === 0) {
           const new_image_data = await getData(
-            `/media/${eventId}/photo_mosaic?since=${loadTime}`
+            `media/${eventId}/photo_mosaic?since=${loadTime}`
           ).then((res) => {
             return res.data.items;
           });
