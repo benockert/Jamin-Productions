@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import "./FlipLayer.css";
+import "./FocusLayer.css";
 
-const FlipLayer = (props) => {
+// focuses a given tile in the front and center of the screen, optionally adds additional animations
+const FocusLayer = (props) => {
   useEffect(() => {
     setTimeout(() => {
       const tile = props.tile;
@@ -17,9 +18,12 @@ const FlipLayer = (props) => {
       domObject.style.left = `${props.endingLeft}px`;
       domObject.style.top = `${props.endingTop}px`;
       domObject.style.scale = 11;
+      domObject.style.zIndex = 10000;
 
-      // start flip animation
-      domObject.classList.add("tile-flipped");
+      // start animations
+      if (props.flipEnabled) {
+        domObject.classList.add("tile-flipped");
+      }
 
       // // return to original position and scale after delay
       setTimeout(() => {
@@ -28,9 +32,10 @@ const FlipLayer = (props) => {
         domObject.style.left = startingLeft;
         domObject.style.top = startingTop;
         domObject.style.scale = 1;
+        domObject.style.zIndex = 1;
       }, 5000);
     }, 2000);
   }, [props.tile]);
 };
 
-export default FlipLayer;
+export default FocusLayer;

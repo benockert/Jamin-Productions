@@ -1,3 +1,10 @@
+# Interactive Media Frontend
+
+Currenlty supports two styles of photo mosaics:
+
+1. front tiles filling in a larger picture, flipping to reveal user submitted photos and messages
+2. standard photo wall displaying user submitted photos
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

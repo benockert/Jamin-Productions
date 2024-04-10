@@ -1,0 +1,4 @@
+/* Flip the tile */
+.tile-flipped {
+    transform: rotateY(180deg);
+}

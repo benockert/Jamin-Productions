@@ -24,6 +24,11 @@ const TilesLayer = (props) => {
     const extraWrap = (image.message?.length ?? 0) > 63;
     const fontSize = extraWrap ? "0.17vw" : wrappedLines ? "0.2vw" : "0.24vw";
 
+    // if we are flipping, use a tile from the background image, otherwise use the full image
+    const frontImageSource = props.flipEnabled
+      ? `${props.tilesPrefix}/${props.cols}x${props.rows}/${image.position_x}_${image.position_y}.jpg`
+      : image.full_image;
+
     const style = {
       height: scaleY + 0.1,
       width: scaleX + 0.1,
@@ -42,20 +47,22 @@ const TilesLayer = (props) => {
         <img
           className="tile-front tile-fade"
           onLoad={(event) => handleImageLoad(event, index)}
-          src={`${props.tilesPrefix}/${props.cols}x${props.rows}/${image.position_x}_${image.position_y}.jpg`}
+          src={frontImageSource}
         ></img>
-        <div className="tile-back">
-          <img
-            className={hasMessage ? "tile-image-message" : "tile-image"}
-            src={image.full_image}
-            alt=""
-          ></img>
-          {hasMessage && (
-            <div style={{ fontSize: fontSize }} className="tile-caption">
-              {image.message}
-            </div>
-          )}
-        </div>
+        {props.flipEnabled && (
+          <div className="tile-back">
+            <img
+              className={hasMessage ? "tile-image-message" : "tile-image"}
+              src={image.full_image}
+              alt=""
+            ></img>
+            {hasMessage && (
+              <div style={{ fontSize: fontSize }} className="tile-caption">
+                {image.message}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   };
