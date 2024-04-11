@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-
+import Divider from "@mui/material/Divider";
 import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
@@ -10,6 +10,9 @@ import Typography from "@mui/material/Typography";
 import MenuItem from "@mui/material/MenuItem";
 import Drawer from "@mui/material/Drawer";
 import MenuIcon from "@mui/icons-material/Menu";
+import IconButton from "@mui/material/IconButton";
+import MailOutlineIcon from "@mui/icons-material/MailOutline";
+import PhoneIcon from "@mui/icons-material/Phone";
 
 const logoStyle = {
   width: "140px",
@@ -18,6 +21,8 @@ const logoStyle = {
   marginTop: "5px",
   padding: "5px",
 };
+
+const sections = ["About", "Services", "Testimonials", "Gallery"];
 
 function NavBar({ mode }) {
   const [open, setOpen] = useState(false);
@@ -65,7 +70,7 @@ function NavBar({ mode }) {
                   ? "rgba(255, 255, 255, 0.4)"
                   : "rgba(0, 0, 0, 0.4)",
               backdropFilter: "blur(24px)",
-              maxHeight: 40,
+              maxHeight: 60,
               border: "1px solid",
               borderColor: "divider",
               boxShadow:
@@ -90,55 +95,42 @@ function NavBar({ mode }) {
                 onClick={() => scrollToSection("landing")}
               />
               <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                <MenuItem
-                  onClick={() => scrollToSection("about")}
-                  sx={{ py: "6px", px: "12px" }}
+                {sections.map((item) => (
+                  <MenuItem
+                    onClick={() => scrollToSection(item.toLowerCase())}
+                    sx={{ py: "6px", px: "18px", borderRadius: 2 }}
+                  >
+                    <Typography variant="body1" color="text.primary">
+                      {item}
+                    </Typography>
+                  </MenuItem>
+                ))}
+              </Box>
+              <Box sx={{ flexGrow: 1 }} />
+              <Box sx={{ display: { xs: "none", md: "flex" } }}>
+                <IconButton
+                  size="large"
+                  aria-label="call 8608789692"
+                  color="inherit"
                 >
-                  <Typography variant="body2" color="text.primary">
-                    About
-                  </Typography>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => scrollToSection("services")}
-                  sx={{ py: "6px", px: "12px" }}
+                  <PhoneIcon />
+                </IconButton>
+                <IconButton
+                  size="large"
+                  aria-label="email jamin productions"
+                  color="inherit"
                 >
-                  <Typography variant="body2" color="text.primary">
-                    Services
-                  </Typography>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => scrollToSection("testimonials")}
-                  sx={{ py: "6px", px: "12px" }}
-                >
-                  <Typography variant="body2" color="text.primary">
-                    Testimonials
-                  </Typography>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => scrollToSection("gallery")}
-                  sx={{ py: "6px", px: "12px" }}
-                >
-                  <Typography variant="body2" color="text.primary">
-                    Gallery
-                  </Typography>
-                </MenuItem>
-                <MenuItem
-                  onClick={() => scrollToSection("contact")}
-                  sx={{ py: "6px", px: "12px" }}
-                >
-                  <Typography variant="body2" color="text.primary">
-                    Contact
-                  </Typography>
-                </MenuItem>
+                  <MailOutlineIcon />
+                </IconButton>
               </Box>
             </Box>
             <Box sx={{ display: { sm: "", md: "none" } }}>
               <Button
                 variant="text"
-                color="primary"
+                color="inherit"
                 aria-label="menu"
                 onClick={toggleDrawer(true)}
-                sx={{ minWidth: "30px", p: "4px" }}
+                sx={{ minWidth: "30px", p: "4px", borderRadius: 2 }}
               >
                 <MenuIcon />
               </Button>
@@ -151,21 +143,30 @@ function NavBar({ mode }) {
                     flexGrow: 1,
                   }}
                 >
-                  <MenuItem onClick={() => scrollToSection("about")}>
-                    About
-                  </MenuItem>
-                  <MenuItem onClick={() => scrollToSection("services")}>
-                    Services
-                  </MenuItem>
-                  <MenuItem onClick={() => scrollToSection("testimonials")}>
-                    Testimonials
-                  </MenuItem>
-                  <MenuItem onClick={() => scrollToSection("gallery")}>
-                    Gallery
-                  </MenuItem>
-                  <MenuItem onClick={() => scrollToSection("contact")}>
-                    Contact
-                  </MenuItem>
+                  {sections.map((item) => (
+                    <MenuItem
+                      onClick={() => scrollToSection(item.toLowerCase())}
+                    >
+                      {item}
+                    </MenuItem>
+                  ))}
+                  <Divider />
+                  <IconButton
+                    size="large"
+                    aria-label="call 8608789692"
+                    color="inherit"
+                    href="tel:8608789692"
+                  >
+                    <PhoneIcon />
+                  </IconButton>
+                  <IconButton
+                    size="large"
+                    aria-label="email jamin productions"
+                    color="inherit"
+                    href="mailto:jaminproductions2@gmail.com"
+                  >
+                    <MailOutlineIcon />
+                  </IconButton>
                 </Box>
               </Drawer>
             </Box>

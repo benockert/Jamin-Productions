@@ -10,7 +10,13 @@ import "./Home.css";
 
 const Home = () => {
   const [mode, setColorMode] = useState("dark");
-  const defaultTheme = createTheme({ palette: { mode } });
+  const defaultTheme = createTheme({
+    palette: { mode },
+    typography: {
+      fontFamily: ["Resplendent", "sans-serif"].join(","),
+      fontSize: 16,
+    },
+  });
 
   return (
     <ThemeProvider theme={defaultTheme}>
