@@ -33,9 +33,8 @@ function NavBar({ mode }) {
 
   const scrollToSection = (sectionId) => {
     const sectionElement = document.getElementById(sectionId);
-    const offset = 128;
     if (sectionElement) {
-      const targetScroll = sectionElement.offsetTop - offset;
+      const targetScroll = sectionElement.offsetTop;
       sectionElement.scrollIntoView({ behavior: "smooth" });
       window.scrollTo({
         top: targetScroll,
@@ -92,7 +91,7 @@ function NavBar({ mode }) {
                 src={mode === "dark" ? "jp-logo-dark.png" : "jp-logo-light.png"}
                 style={logoStyle}
                 alt=""
-                onClick={() => scrollToSection("landing")}
+                onClick={() => scrollToSection("home")}
               />
               <Box sx={{ display: { xs: "none", md: "flex" } }}>
                 {sections.map((item) => (
@@ -100,7 +99,7 @@ function NavBar({ mode }) {
                     onClick={() => scrollToSection(item.toLowerCase())}
                     sx={{ py: "6px", px: "18px", borderRadius: 2 }}
                   >
-                    <Typography variant="body1" color="text.primary">
+                    <Typography variant="h6" color="text.primary">
                       {item}
                     </Typography>
                   </MenuItem>
