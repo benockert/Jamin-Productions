@@ -31,7 +31,7 @@ function Login() {
     get_session(data.get("access-code")).then((res) => {
       if (res.status === 200) {
         sessionStorage.setItem("source_control_jwt", res.token);
-        navigate(res.redirect_page);
+        navigate(res.redirect_path);
       } else {
         setError(res.message);
       }
@@ -86,7 +86,7 @@ function Login() {
             <Avatar
               sx={{ width: 90, height: "auto" }}
               variant="square"
-              src={`https://static.event-media-control.com/clients/${domain.current}.png`}
+              src={`https://static.jaminproductions.com/dev/media_control/assets/${domain.currentTarget}.png`}
             ></Avatar>
             <Divider orientation="vertical" flexItem />
             <Box>

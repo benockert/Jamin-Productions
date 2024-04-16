@@ -1,0 +1,1 @@
+// handles streams from DynamoDB

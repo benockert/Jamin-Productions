@@ -43,15 +43,15 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 
-const SOCKET_HOST =
-  process.env.NODE_ENV === "production"
-    ? "http://44.198.176.45:5002"
-    : "http://localhost:5002";
+// const SOCKET_HOST =
+//   process.env.NODE_ENV === "production"
+//     ? "http://44.198.176.45:5002"
+//     : "http://localhost:5002";
 const API_HOST =
   process.env.NODE_ENV === "production"
     ? "http://44.198.176.45:5002/api/v1"
-    : "http://localhost:5002/api/v1";
-const STATIC_URL = "https://static.event-media-control.com";
+    : "https://olrk6aszw4.execute-api.us-east-1.amazonaws.com";
+const STATIC_URL = "https://static.jaminproductions.com";
 
 const Item = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.main,
@@ -85,7 +85,7 @@ function ScreensView({
 }) {
   const connectedScreenCards = [];
   const allScreens = screens.reduce(
-    (acc, cur) => ((acc[cur.url_name] = cur), acc),
+    (acc, cur) => ((acc[cur.id] = cur), acc),
     {}
   );
   if (connectedScreens) {
@@ -98,7 +98,7 @@ function ScreensView({
               className="screen-image"
               component="iframe"
               scrolling="no"
-              src={`${API_HOST}/${event.id}/${screenInfo.cur_media_url}`}
+              src={`${API_HOST}/${event.id}/${screenInfo.current_media_id}`}
               sx={{ objectFit: "contain" }}
             />
             <CardContent>
@@ -134,7 +134,7 @@ function ScreensView({
                 onClick={() =>
                   onClickCallback({
                     screen_url: screenUrl,
-                    media_url: screenInfo.cur_media_url,
+                    media_url: screenInfo.current_media_id,
                     screen_name: screenInfo.name,
                     orientation: allScreens[screenUrl]?.orientation,
                   })
@@ -198,15 +198,15 @@ function ScreensView({
   const disconnectedScreenCards = [];
   if (screens) {
     Array.from(screens).forEach((screen) => {
-      if (!connectedScreens?.hasOwnProperty(screen.url_name)) {
+      if (!connectedScreens?.hasOwnProperty(screen.id)) {
         disconnectedScreenCards.push(
-          <Grid item xs={10} sm={8} md={6} key={`screen_${screen.url_name}`}>
+          <Grid item xs={10} sm={8} md={6} key={`screen_${screen.id}`}>
             <Card component={Item} sx={{ maxWidth: 280 }}>
               <CardActionArea>
                 <CardMedia
                   className="screen-image"
                   component="img"
-                  src={`${STATIC_URL}/screens/screen_not_online.jpg`}
+                  src="static.jaminproductions.com/dev/media_control/assets/screen_not_online.jpg"
                   alt="Screen not online"
                   sx={{ objectFit: "contain" }}
                 />
@@ -252,38 +252,40 @@ function Admin() {
   const [dialogVolume, setDialogVolume] = useState();
   const token = useRef(sessionStorage.getItem("source_control_jwt"));
 
+  // useEffect(() => {
+  //   if (event) {
+  //     const socket = io(SOCKET_HOST);
+
+  //     socket.on("connect", () => {
+  //       socket.emit("admin_connected", { token: token.current });
+  //     });
+
+  //     socket.on("screen_updates", (data) => {
+  //       setRealtimeScreenData(data);
+  //     });
+
+  //     socket.on("playback_updates", (data) => {
+  //       setPlaybackData(data);
+  //     });
+
+  //     socket.on("disconnect", () => window.location.reload(false));
+  //   }
+  // }, [event]);
+
   useEffect(() => {
-    if (event) {
-      const socket = io(SOCKET_HOST);
-
-      socket.on("connect", () => {
-        socket.emit("admin_connected", { token: token.current });
-      });
-
-      socket.on("screen_updates", (data) => {
-        setRealtimeScreenData(data);
-      });
-
-      socket.on("playback_updates", (data) => {
-        setPlaybackData(data);
-      });
-
-      socket.on("disconnect", () => window.location.reload(false));
-    }
-  }, [event]);
-
-  useEffect(() => {
-    get_event(token.current).then((event) => {
-      console.log(event);
-      setEvent(event);
+    get_event(token.current).then((data) => {
+      console.log("Event:", data);
+      setEvent(data);
     });
 
-    get_screens(token.current).then((screens) => {
-      setScreens(screens);
+    get_screens(token.current).then((data) => {
+      console.log("Screens:", data);
+      setScreens(data.screens);
     });
 
-    get_media(token.current).then((media) => {
-      setMedia(media);
+    get_media(token.current).then((data) => {
+      console.log("Media:", data);
+      setMedia(data.media);
     });
   }, []);
 
@@ -348,8 +350,7 @@ function Admin() {
 
   return (
     event &&
-    media &&
-    realtimeScreenData && (
+    media && (
       <ThemeProvider theme={dashboardTheme}>
         <Grid container component="main" sx={{ height: "100vh" }}>
           <Grid
@@ -358,7 +359,7 @@ function Admin() {
             sm={4}
             md={7}
             sx={{
-              backgroundImage: `url(${STATIC_URL + event.banner_image_name})`,
+              backgroundImage: `url(${event.banner_image_url})`,
               backgroundRepeat: "no-repeat",
               backgroundColor: "background.default",
               backgroundSize: "cover",
@@ -413,7 +414,7 @@ function Admin() {
                 sx={{ marginBottom: 4, width: "100%" }}
                 role="presentation"
               />
-              <ScreensView
+              {/* <ScreensView
                 event={event}
                 screens={screens}
                 connectedScreens={realtimeScreenData.screenMedia}
@@ -422,7 +423,7 @@ function Admin() {
                 onClickCallback={onScreenCardClick}
                 toggleVolumeDialog={toggleVolumeDialog}
                 sendVideoAction={sendVideoAction}
-              ></ScreensView>
+              ></ScreensView> */}
               <ChooseMediaPopupDialog
                 openDialog={openChooseMediaDialog}
                 media={media}

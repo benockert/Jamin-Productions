@@ -1,0 +1,34 @@
+{
+  "name": "commenced-backend",
+  "version": "0.0.1",
+  "description": "Content source controller backend",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "deploy": "npm install && node src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/benockert/commenced.git"
+  },
+  "author": "Ben Ockert",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/benockert/commenced/issues"
+  },
+  "homepage": "https://github.com/benockert/commenced#readme",
+  "dependencies": {
+    "body-parser": "^1.20.1",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "firebase": "^9.19.1",
+    "jsonwebtoken": "^9.0.0",
+    "mysql2": "^3.2.0",
+    "request": "^2.88.2",
+    "serverless-http": "^3.1.1",
+    "socket.io": "^4.5.4"
+  }
+}

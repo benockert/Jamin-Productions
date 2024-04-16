@@ -1,0 +1,244 @@
+service: event-media-control-backend
+frameworkVersion: "3"
+
+package:
+  individually: false # to help avoid EMFILE: too many open files error, in addition to moving dev dependencies
+
+plugins:
+  - serverless-domain-manager
+  # - serverless-deployment-bucket
+
+custom:
+  deploymentBucketName: "event-media-control.serverless.${opt:region, self:provider.region}.deploys"
+  mediaControlTableName: "event-media-control-${sls:stage}"
+  authTableName: "event-media-control-auth-${sls:stage}"
+  websocketConnectionsTableName: "event-media-control-websocket-connections-${sls:stage}"
+  stackName: "event-media-control-api-backend-stack-${sls:stage}"
+  domainName: "event-media-control.com"
+
+  jaminProductionsApi:
+    dev: https://pm0v1kb80m.execute-api.us-west-2.amazonaws.com
+    prod: https://api.jaminproductions.com
+
+  # NOTE: will need to update this in case of a stack recreation
+  websocketCallbackUrl:
+    dev: 7u2mqu2n2i.execute-api.us-east-1.amazonaws.com/dev
+
+  # for routing 53 domain and latency routing
+  customDomainsEnabled:
+    dev: false
+    prod: true
+  certificateName: ${self:custom.domainName}
+  regionalApiDomain: api-${opt:region, self:provider.region}.${self:custom.domainName}
+  apiDomain: api.${self:custom.domainName}
+  customDomains:
+    # api.event-media-control.com/{stage}
+    - http:
+        certificateName: "${self:custom.domainName}"
+        domainName: ${self:custom.apiDomain}
+        basePath: ""
+        endpointType: "regional"
+        createRoute53Record: true
+        securityPolicy: tls_1_2
+        route53Params:
+          routingPolicy: latency
+        autoDomain: true # so gets included in severless deploy
+        enabled: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
+    # api.{region}.event-media-control.com/{stage}
+    - http:
+        certificateName: "${self:custom.domainName}"
+        domainName: ${self:custom.regionalApiDomain}
+        basePath: ""
+        endpointType: "regional"
+        createRoute53Record: true
+        securityPolicy: tls_1_2
+        route53Params:
+          routingPolicy: latency
+        autoDomain: true
+        enabled: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
+
+provider:
+  name: aws
+  stage: dev # use --stage {stage_name} to override during deploy
+  region: us-east-1 # use --region {region_name} to override during deploy, new regions will need SSM params
+  stackName: ${self:custom.stackName}
+  runtime: nodejs18.x
+  stackTags:
+    AppManagerCFNStackKey: "Event-Media-Control-serverless-${sls:stage}" # to enable Application Manager cost tracking
+  deploymentBucket:
+    name: ${self:custom.deploymentBucketName}
+    maxPreviousDeploymentArtifacts: 10
+    versioning: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:BatchGetItem
+            - dynamodb:BatchWriteItem
+            - dynamodb:ConditionCheckItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - s3:PutObject
+            - s3:GetObject
+          Resource:
+            - !Sub "arn:aws:dynamodb:${opt:region, self:provider.region}:${AWS::AccountId}:table/${self:custom.mediaControlTableName}"
+            - !Sub "arn:aws:dynamodb:${opt:region, self:provider.region}:${AWS::AccountId}:table/${self:custom.websocketConnectionsTableName}"
+            - !Sub "arn:aws:dynamodb:${opt:region, self:provider.region}:${AWS::AccountId}:table/${self:custom.authTableName}"
+  environment:
+    EVENT_MEDIA_CONTROL_TABLE: ${self:custom.mediaControlTableName}
+    WEBSOCKET_CONNECTIONS_TABLE: ${self:custom.websocketConnectionsTableName}
+    AUTH_TABLE: ${self:custom.authTableName}
+    JWT_SECRET: ${ssm:event-media-control-jwt-secret}
+    JP_API_URL: ${self:custom.jaminProductionsApi.${opt:stage, self:provider.stage}}
+    WS_CALLBACK_URL: ${self:custom.websocketCallbackUrl.${opt:stage, self:provider.stage}}
+    APP_STAGE: ${sls:stage}
+    APP_REGION: ${opt:region, self:provider.region}
+  httpApi:
+    metrics: true
+    cors: true
+    disableDefaultEndpoint: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
+  websocketsApiName: event-media-control-ws-api
+  websocketsApiRouteSelectionExpression: $request.body.action
+  websocketsDescription: Websockets for realtime updates to screens
+
+functions:
+  sessionHandler:
+    memorySize: 512
+    timeout: 10
+    name: event-media-control-session-handler-${sls:stage}
+    description: "Handler for creating and validating user sessions"
+    handler: http/routes/session.handler
+    events:
+      - httpApi: "POST /v1/session"
+      - httpApi: "POST /v1/session/validate"
+    # role:
+  screensHandler:
+    memorySize: 512
+    timeout: 10
+    name: event-media-control-screens-handler-${sls:stage}
+    description: "Handler for getting and updating screens"
+    handler: http/routes/screens.handler
+    events:
+      - httpApi: "GET /v1/screens"
+      - httpApi: "POST /v1/screens/{screenId}/media"
+      - httpApi: "PUT /v1/screens/{screenId}/media"
+    # role:
+  mediaHandler:
+    memorySize: 512
+    timeout: 10
+    name: event-media-control-media-handler-${sls:stage}
+    description: "Handler for getting and updating event media sources"
+    handler: http/routes/media.handler
+    events:
+      - httpApi: "GET /v1/media"
+    # role:
+  eventHandler:
+    memorySize: 512
+    timeout: 10
+    name: event-media-control-event-handler-${sls:stage}
+    description: "Handler for getting event information"
+    handler: http/routes/event.handler
+    events:
+      - httpApi: "GET /v1/event"
+    # role:
+
+  # websocket handlers
+  connectHandler:
+    handler: ws/connect.handler
+    events:
+      - websocket:
+          route: $connect
+  disconnectHandler:
+    handler: ws/disconnect.handler
+    events:
+      - websocket:
+          route: $disconnect
+  subscribeHandler:
+    handler: ws/subscribe.handler
+    events:
+      - websocket:
+          route: subscribe
+  # broadcast:
+  #   handler: ws/broadcast.handler
+  #   events:
+  #     - stream:
+  #         type: dynamodb
+  #         arn:
+  #           Fn::GetAtt: [MediaControlTable, StreamArn]
+
+resources:
+  Conditions:
+    IsUsEast1: !Equals [!Ref AWS::Region, us-east-1]
+    IsProd:
+      Fn::Equals:
+        - ${sls:stage}
+        - prod
+  Resources:
+    MediaControlTable:
+      Type: AWS::DynamoDB::GlobalTable
+      DeletionPolicy: Retain
+      Condition: IsUsEast1
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        Replicas:
+          - Region: us-east-1
+          - Region: us-west-2
+        AttributeDefinitions:
+          - AttributeName: event_id
+            AttributeType: S
+          - AttributeName: key
+            AttributeType: S
+        KeySchema:
+          - AttributeName: event_id
+            KeyType: HASH
+          - AttributeName: key
+            KeyType: RANGE
+        TableName: ${self:custom.mediaControlTableName}
+        StreamSpecification:
+          StreamViewType: NEW_IMAGE
+    WebSocketTable:
+      Type: AWS::DynamoDB::GlobalTable
+      DeletionPolicy: Retain
+      Condition: IsUsEast1
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        Replicas:
+          - Region: us-east-1
+          - Region: us-west-2
+        AttributeDefinitions:
+          - AttributeName: connection_id
+            AttributeType: S
+          - AttributeName: channel
+            AttributeType: S
+        KeySchema:
+          - AttributeName: connection_id
+            KeyType: HASH
+          - AttributeName: channel
+            KeyType: RANGE
+        TableName: ${self:custom.websocketConnectionsTableName}
+        StreamSpecification:
+          StreamViewType: KEYS_ONLY
+    AuthTable:
+      Type: AWS::DynamoDB::GlobalTable
+      DeletionPolicy: Retain
+      Condition: IsUsEast1
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        Replicas:
+          - Region: us-east-1
+          - Region: us-west-2
+        AttributeDefinitions:
+          - AttributeName: access_code
+            AttributeType: S
+        KeySchema:
+          - AttributeName: access_code
+            KeyType: HASH
+        TableName: ${self:custom.authTableName}
+        StreamSpecification:
+          StreamViewType: KEYS_ONLY

@@ -43,7 +43,7 @@ export default function ChooseMediaPopupDialog({
                 {media.map((m) => {
                   return (
                     m.orientation == openDialog.orientation && (
-                      <MenuItem key={m.url_name} value={m.url_name}>
+                      <MenuItem key={m.id} value={m.id}>
                         {m.short_name}
                       </MenuItem>
                     )

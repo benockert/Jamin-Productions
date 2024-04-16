@@ -1,7 +1,7 @@
 const API_HOST =
   process.env.NODE_ENV === "production"
     ? "http://44.198.176.45:5002"
-    : "http://localhost:5002";
+    : "https://olrk6aszw4.execute-api.us-east-1.amazonaws.com";
 
 async function api_get(path, token) {
   const req = {
@@ -10,7 +10,7 @@ async function api_get(path, token) {
       authorization: `Bearer ${token}`,
     },
   };
-  const response = await fetch(`${API_HOST}/api/${path}`, req);
+  const response = await fetch(`${API_HOST}/${path}`, req);
   const data = await response.json();
   return data;
 }
@@ -22,7 +22,7 @@ async function api_put(path, token) {
       authorization: `Bearer ${token}`,
     },
   };
-  const response = await fetch(`${API_HOST}/api/${path}`, req);
+  const response = await fetch(`${API_HOST}/${path}`, req);
   const data = await response.json();
   return { status: response.status, body: data };
 }
@@ -36,13 +36,13 @@ async function api_post(path, body, token) {
     },
     body: JSON.stringify(body),
   };
-  const response = await fetch(`${API_HOST}/api/${path}`, req);
+  const response = await fetch(`${API_HOST}/${path}`, req);
   const data = await response.json();
   return data;
 }
 
 export function get_event(token) {
-  const path = `v1/events`;
+  const path = `v1/event`;
   return api_get(path, token);
 }
 
