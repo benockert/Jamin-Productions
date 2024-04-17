@@ -41,7 +41,6 @@ app.put(`/v1/${route}/:screenId/media`, auth(2), (req, res, next) => {
   const screenId = req.params.screenId;
   const newMediaId = req.body.new_media_id;
   screenHandler.updateSource(res, screenId, newMediaId, next);
-  // screenHandler.updateCurrentMediaOfScreen(res, screenId, newMediaId, next);
 });
 
 // no need for catch-all as we don't have a * wildcard in serverless template

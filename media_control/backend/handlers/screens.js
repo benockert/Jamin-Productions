@@ -52,37 +52,48 @@ module.exports.updateCurrentMediaOfScreen = (
   );
 };
 
-module.exports.updateSource = (res, screenId, newMediaId, next) => {
-  const eventId = res.locals.eventId;
-  const channel = `channel.screen.${screenId}`;
-
+module.exports.broadcastScreenChangesHandler = async (
+  eventId,
+  channel,
+  data
+) => {
   const apigwManagementApi = new AWS.ApiGatewayManagementApi({
     apiVersion: "2018-11-29",
     endpoint: process.env.WS_CALLBACK_URL,
   });
 
-  const postData = {
+  const connections = await wss_ddb.getAllChannelConnections(eventId, channel);
+
+  if (connections) {
+    const postCalls = connections.map(async ({ connection_id }) => {
+      await apigwManagementApi
+        .postToConnection({
+          ConnectionId: connection_id,
+          Data: JSON.stringify(data),
+        })
+        .promise();
+    });
+    // doesn't resolve to anything, no point in returning anything; stream is our feedback loop
+    await Promise.all(postCalls);
+  }
+
+  return true;
+};
+
+module.exports.updateSource = async (res, screenId, newMediaId, next) => {
+  const eventId = res.locals.eventId;
+  const channel = `channel.screen.${screenId}`;
+  const data = {
     action: "update_source",
     new_source: newMediaId,
   };
 
-  console.log({ postData });
-
-  wss_ddb.getAllChannelConnections(eventId, channel).then(
-    async (connections) => {
-      if (connections) {
-        const postCalls = connections.map(async ({ connection_id }) => {
-          await apigwManagementApi
-            .postToConnection({
-              ConnectionId: connection_id,
-              Data: JSON.stringify(postData),
-            })
-            .promise();
-        });
-        const postResults = await Promise.all(postCalls);
-        console.log({ postResults });
+  module.exports.broadcastScreenChangesHandler(eventId, channel, data).then(
+    (result) => {
+      if (result) {
+        console.log({ broadcastResults: JSON.stringify(result) });
+        res.status(200).send({ status: 200, message: "message sent" });
       }
-      res.status(200).send({ status: 200, message: "message sent" });
     },
     (err) => {
       next(err);

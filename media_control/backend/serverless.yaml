@@ -164,13 +164,13 @@ functions:
     events:
       - websocket:
           route: subscribe
-  # broadcast:
-  #   handler: ws/broadcast.handler
-  #   events:
-  #     - stream:
-  #         type: dynamodb
-  #         arn:
-  #           Fn::GetAtt: [MediaControlTable, StreamArn]
+  broadcast:
+    handler: ws/broadcast.handler
+    events:
+      - stream:
+          type: dynamodb
+          arn:
+            Fn::GetAtt: [MediaControlTable, StreamArn]
 
 resources:
   Conditions:
