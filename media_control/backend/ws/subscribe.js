@@ -29,5 +29,3 @@ module.exports.handler = async (event, context) => {
     return { statusCode: 500 };
   }
 };
-
-// socket.emit("event_name", {"id":"123"}, (res)=>{console.log(res); });

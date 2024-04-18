@@ -27,14 +27,6 @@ app.get(`/v1/${route}/`, auth(1), (req, res, next) => {
   screenHandler.getScreens(res, next);
 });
 
-// gets the current media for the screen with the given id
-// no auth, so need eventId in request params
-app.get(`/v1/${route}/:eventId/:screenId/media`, (req, res, next) => {
-  const eventId = req.params.eventId;
-  const screenId = req.params.screenId;
-  screenHandler.getCurentMediaOfScreen(res, eventId, screenId, next);
-});
-
 // transmits a new media source to active connections with the given screen id
 // only admin scope
 app.put(`/v1/${route}/:screenId/media`, auth(2), (req, res, next) => {

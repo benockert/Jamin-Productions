@@ -91,7 +91,6 @@ module.exports.updateSource = async (res, screenId, newMediaId, next) => {
   module.exports.broadcastScreenChangesHandler(eventId, channel, data).then(
     (result) => {
       if (result) {
-        console.log({ broadcastResults: JSON.stringify(result) });
         res.status(200).send({ status: 200, message: "message sent" });
       }
     },

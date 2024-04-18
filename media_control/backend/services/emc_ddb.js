@@ -17,9 +17,8 @@ const getItem = async (eventId, key) => {
       key,
     },
   };
-  console.log(params.Key);
-  const { Item } = await dynamoDbClient.send(new GetCommand(params));
 
+  const { Item } = await dynamoDbClient.send(new GetCommand(params));
   // will be undefined if no item matches Key
   return Item;
 };
@@ -52,7 +51,6 @@ const queryForItems = async (eventId, lek, sortKeyPrefix) => {
     new QueryCommand(params)
   );
   return { Items, LastEvaluatedKey };
-  s;
 };
 
 const updateItem = async (eventId, key, updateParams) => {
@@ -76,7 +74,7 @@ module.exports.getScreens = async (eventId, lek) => {
 };
 
 module.exports.getScreen = async (eventId, screenId) => {
-  const screenKey = `screen.${screenId}`;
+  const screenKey = screenId;
   return await getItem(eventId, screenKey);
 };
 
@@ -84,12 +82,13 @@ module.exports.getMedia = async (eventId, lek) => {
   return await queryForItems(eventId, lek, "media.");
 };
 
+// full screen id i.e. screen.test
 module.exports.updateScreenWithNewMedia = async (
   eventId,
   screenId,
   newMediaId
 ) => {
-  const screenKey = `screen.${screenId}`;
+  const screenKey = screenId;
   const updateParams = {
     UpdateExpression: "set #k = :v",
     ExpressionAttributeNames: { "#k": "current_media_id" },

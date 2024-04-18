@@ -1,45 +1,34 @@
-const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
-const {
-  DynamoDBDocumentClient,
-  DeleteCommand,
-  QueryCommand,
-} = require("@aws-sdk/lib-dynamodb");
-const client = new DynamoDBClient({
-  apiVersion: "2012-08-10",
-});
-const dynamoDbClient = DynamoDBDocumentClient.from(client);
+const ddb = require("../services/emc_ddb");
+const wss_ddb = require("../services/wss_ddb");
 
 module.exports.handler = async (event, context) => {
   const connectionId = event.requestContext.connectionId;
 
-  const queryParams = {
-    TableName: process.env.WEBSOCKET_CONNECTIONS_TABLE,
-    KeyConditionExpression: "#npk = :npk AND begins_with(#nsk, :nsk)",
-    ExpressionAttributeNames: {
-      "#npk": "connection_id",
-      "#nsk": "channel",
-    },
-    ExpressionAttributeValues: {
-      ":npk": connectionId,
-      ":nsk": "channel.",
-    },
-  };
-
   try {
-    const { Items } = await dynamoDbClient.send(new QueryCommand(queryParams));
+    const Items = await wss_ddb.getConnection(connectionId);
 
     const unsubscribes = Items.map(async (channelConnection) => {
-      const deleteParams = {
-        TableName: process.env.WEBSOCKET_CONNECTIONS_TABLE,
-        Key: {
-          connection_id: channelConnection.connection_id,
-          channel: channelConnection.channel,
-        },
-      };
-      const deleteResponse = await dynamoDbClient.send(
-        new DeleteCommand(deleteParams)
+      const connectionId = channelConnection.connection_id;
+      const channel = channelConnection.channel;
+
+      // delete the connection from our db
+      const deleteConnectionStatus = await wss_ddb.deleteConnection(
+        connectionId,
+        channel
       );
-      return deleteResponse.$metadata.httpStatusCode;
+
+      let deleteCurrentMediaStatus = 0;
+      if (channel.includes("screen")) {
+        const screenId = channel.substring(channel.indexOf(".") + 1);
+        // also remove the current media entry for the disconnected screen
+        deleteCurrentMediaStatus = await ddb.updateScreenWithNewMedia(
+          channelConnection.event_id,
+          screenId,
+          "" // nothing
+        );
+      }
+
+      return Math.max([deleteConnectionStatus, deleteCurrentMediaStatus]);
     });
 
     // resolve delete commands and report overall status (max of all statuses so 4/500s will be reported if any)
