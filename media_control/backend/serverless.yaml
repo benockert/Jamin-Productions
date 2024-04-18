@@ -126,7 +126,6 @@ functions:
     handler: http/routes/screens.handler
     events:
       - httpApi: "GET /v1/screens"
-      - httpApi: "POST /v1/screens/{screenId}/media"
       - httpApi: "PUT /v1/screens/{screenId}/media"
     # role:
   mediaHandler:
@@ -147,6 +146,16 @@ functions:
     events:
       - httpApi: "GET /v1/event"
     # role:
+  publicHandler:
+    memorySize: 512
+    timeout: 10
+    name: event-media-control-public-handler-${sls:stage}
+    description: "Handler for public endpoints"
+    handler: http/routes/public.handler
+    events:
+      - httpApi: "GET /v1/{eventId}/screens/{screenId}/media"
+      - httpApi: "GET /v1/html/{eventId}/{screenId}/{mediaId}"
+    # role:
 
   # websocket handlers
   connectHandler:
@@ -164,6 +173,11 @@ functions:
     events:
       - websocket:
           route: subscribe
+  emitHandler:
+    handler: ws/emit.handler
+    events:
+      - websocket:
+          route: emit
   broadcast:
     handler: ws/broadcast.handler
     events:

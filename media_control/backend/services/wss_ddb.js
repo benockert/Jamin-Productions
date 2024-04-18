@@ -3,7 +3,7 @@ const {
   DynamoDBDocumentClient,
   ScanCommand,
   DeleteCommand,
-  UpdateCommand,
+  PutCommand,
   QueryCommand,
 } = require("@aws-sdk/lib-dynamodb");
 
@@ -48,6 +48,16 @@ const deleteItems = async (deleteParams) => {
   return deleteResponse.$metadata.httpStatusCode;
 };
 
+const putItem = async (putParams) => {
+  const params = {
+    TableName: process.env.WEBSOCKET_CONNECTIONS_TABLE,
+    ...putParams,
+  };
+
+  const putResponse = await dynamoDbClient.send(new PutCommand(params));
+  return putResponse.$metadata.httpStatusCode;
+};
+
 module.exports.getAllChannelConnections = async (eventId, channel) => {
   const scanParams = {
     ExpressionAttributeNames: { "#nsk": "channel", "#n1": "event_id" },
@@ -72,4 +82,19 @@ module.exports.deleteConnection = async (connectionId, channel) => {
 
 module.exports.getConnection = async (connectionId) => {
   return await queryForItems(connectionId);
+};
+
+module.exports.putConnectionSubscription = async (
+  connectionId,
+  eventId,
+  channelName
+) => {
+  const params = {
+    Item: {
+      connection_id: connectionId,
+      channel: `channel.${channelName}`,
+      event_id: eventId,
+    },
+  };
+  return await putItem(params);
 };
