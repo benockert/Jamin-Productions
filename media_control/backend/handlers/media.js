@@ -1,4 +1,5 @@
 const ddb = require("../services/emc_ddb");
+var https = require("https");
 
 module.exports.getMedia = (res, next) => {
   const eventId = res.locals.eventId;
@@ -10,4 +11,20 @@ module.exports.getMedia = (res, next) => {
       next(err);
     }
   );
+};
+
+module.exports.sendStaticWebPage = (res, eventId, mediaId, next) => {
+  try {
+    https
+      .request(
+        `https://static.jaminproductions.com/emc/${eventId}/${mediaId}.html`,
+        (externalRes) => {
+          res.setHeader("content-disposition", "inline");
+          externalRes.pipe(res);
+        }
+      )
+      .end();
+  } catch (e) {
+    next(e);
+  }
 };
