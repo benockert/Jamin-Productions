@@ -1,5 +1,6 @@
 ec2.id=ec2-44-198-176-45
-cloudfront.id=ELA3HAHUGMT3E
+webcloudfront.id=ELA3HAHUGMT3E
+staticcloudfront.id=E3U0ZH1BFZK6SL
 
 deploy-web:
 	cd web && npm run build
@@ -15,6 +16,12 @@ deploy: deploy-web deploy-server
 
 copy-html:
 	scp -i emc_key.pem -r ./server/src/html/5 ec2-user@${ec2.id}.compute-1.amazonaws.com:/home/ec2-user/server/src/html
+
+# make event=northeastern2024 sync-static
+sync-static:
+	aws s3 sync frontend/html/ s3://static.jaminproductions.com/emc/$(event)/
+	aws s3 sync frontend/js/ s3://static.jaminproductions.com/emc/
+	# aws cloudfront create-invalidation --distribution-id ${staticcloudfront.id} --paths "/emc/*"
 
 ssh:
 	ssh -i emc_key.pem ec2-user@${ec2.id}.compute-1.amazonaws.com

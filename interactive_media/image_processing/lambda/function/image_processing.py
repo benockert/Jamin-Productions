@@ -1788,29 +1788,42 @@ class RekognitionModerationLabel(RekognitionLabel):
         # self.taxonomy_level = label_obj["TaxonomyLevel"]
 
 # for local testing
-# if __name__ == "__main__":
-#     logging.basicConfig(
-#         level=logging.INFO,
-#         handlers=[
-#             logging.StreamHandler()
-#         ]
-#     )
+if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO,
+        handlers=[
+            logging.StreamHandler()
+        ]
+    )
 
-#     bucket = "static.jaminproductions.com"
-#     key = "dev/interactive_media/photo_mosaic/northeastern2024/upload/5b3e44b0-8824-4d90-8f40-c57ad1239633.jpg"
-#     result = True #detect_labels(bucket, key)
-#     ddb_sort_key, ddb_partition_key = ("image.1710481050226-025e7099-e2d9-4197-84b2-6e64a6132976", "northeastern2024") #process_image(bucket, key, "./test")
-#     if (result):
-#         logger.info("Image passes checks, updating active status in ddb and assigning position in mosaic")
-#         mosaic_info = get_event_mosaic_info(ddb_partition_key)
-#         position = assign_position(ddb_partition_key, mosaic_info["available_positions"]["L"])
-#         result = enable_submission_in_ddb(ddb_partition_key, ddb_sort_key, position)
-#         if (result == 200):
-#             logger.info("Successfully updated active status and position of {} > {}".format(ddb_partition_key, ddb_partition_key))
-#         else:
-#             logger.error("Unsucessful attempt at updating active status of {}".format(ddb_partition_key))
-#     else:
-#         logger.info("Found inappropriate immage, nothing to update in ddb.")
+    bucket = "static.jaminproductions.com"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711144798136-482cdb35-bde2-4593-bb2d-134ab36c7620-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711144973188-2454495f-7f54-45ca-bf69-42796b7ed190-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711144632961-8ee85aff-89c3-48e2-9df8-092f1b5f9fe7-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711145635435-70427de6-b905-432b-ad8a-54c878fce306-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711143273454-c36e7a4a-1c05-46ad-98bb-674cd058f01c-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1712044104649-a94f761b-430e-48aa-b537-ee18c1d0ce9b-resized.jpeg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711145842425-c4a3eed4-68d5-4a82-bc01-2bef7fed2680-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711144889151-7f3d3085-14d1-4cf2-be63-31aa7c396d7f-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711145671961-fc70cedc-a32b-4208-b0ef-1b2d0f50e24a-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711145716256-48e85390-8618-47ed-a054-d56e40a6141f-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711145291934-bf033e84-31c7-400e-8572-1b163fcf7da6-resized.jpg"
+    key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711144632961-8ee85aff-89c3-48e2-9df8-092f1b5f9fe7-resized.jpg"
+    # key = "prod/interactive_media/photo_mosaic/northeastern2024/processed/1711143273454-c36e7a4a-1c05-46ad-98bb-674cd058f01c-resized.jpg"
+    boo, strin = detect_labels(bucket, key)
+    print(boo)
+    print(strin)
+    # ddb_sort_key, ddb_partition_key = ("image.1710481050226-025e7099-e2d9-4197-84b2-6e64a6132976", "northeastern2024") #process_image(bucket, key, "./test")
+    # if (result):
+    #     logger.info("Image passes checks, updating active status in ddb and assigning position in mosaic")
+    #     mosaic_info = get_event_mosaic_info(ddb_partition_key)
+    #     position = assign_position(ddb_partition_key, mosaic_info["available_positions"]["L"])
+    #     result = enable_submission_in_ddb(ddb_partition_key, ddb_sort_key, position)
+    #     if (result == 200):
+    #         logger.info("Successfully updated active status and position of {} > {}".format(ddb_partition_key, ddb_partition_key))
+    #     else:
+    #         logger.error("Unsucessful attempt at updating active status of {}".format(ddb_partition_key))
+    # else:
     #     logger.info("Found inappropriate immage, nothing to update in ddb.")
     # mosaic_info = get_event_mosaic_position_info("northeastern2024")
     # print(mosaic_info)

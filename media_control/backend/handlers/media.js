@@ -20,6 +20,7 @@ module.exports.sendStaticWebPage = (res, eventId, mediaId, next) => {
         `https://static.jaminproductions.com/emc/${eventId}/${mediaId}.html`,
         (externalRes) => {
           res.setHeader("content-disposition", "inline");
+          res.setHeader("content-type", "text/html");
           externalRes.pipe(res);
         }
       )
