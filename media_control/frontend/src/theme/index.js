@@ -1,46 +1,55 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from "@mui/material/styles";
 
 export const loginTheme = createTheme({
   palette: {
     primary: {
-      main: '#C8102E' // likely brand primary as well
+      main: "#C8102E", // likely brand primary as well
     },
     secondary: {
-      main: '#f6f6f6' // likely brand light
+      main: "#f6f6f6", // likely brand light
     },
     background: {
-      default: '#1a1a1a' // likely brand dark as well, or a dark grey
+      default: "#1a1a1a", // likely brand dark as well, or a dark grey
     },
     brand_colors: {
-      primary: '#C8102E',
-      secondary: '#1a1a1a',
-      dark: '#1a1a1a',
-      light: '#f6f6f6',
-    }
+      primary: "#C8102E",
+      secondary: "#1a1a1a",
+      dark: "#1a1a1a",
+      light: "#f6f6f6",
+    },
   },
 });
 
 export const dashboardTheme = createTheme({
   palette: {
     primary: {
-      main: '#C8102E', // likely brand primary as well
+      main: "#C8102E", // likely brand primary as well
     },
     secondary: {
-      main: '#f6f6f6', // likely brand light
+      main: "#f6f6f6", // likely brand light
     },
     background: {
-      default: '#1a1a1a', // likely brand dark as well, or a dark grey
-      white: '#f6f6f6',
-      grey: '#fafafa',
-      transparent_grey: '#C0C0C0CB'
+      default: "#1a1a1a", // likely brand dark as well, or a dark grey
+      white: "#f6f6f6",
+      grey: "#fafafa",
+      transparent_grey: "#C0C0C0CB",
     },
     brand_colors: {
-      primary: '#C8102E',
-      secondary: '#1a1a1a',
-      dark: '#1a1a1a',
-      light: '#f6f6f6',
+      primary: "#C8102E",
+      secondary: "#1a1a1a",
+      dark: "#1a1a1a",
+      light: "#f6f6f6",
     },
-    divider: 'rgba(255, 255, 255, 0.12)',
+    divider: "rgba(255, 255, 255, 0.12)",
+  },
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 1000,
+      lg: 1250,
+      xl: 1650,
+    },
   },
   components: {
     MuiChip: {
@@ -51,9 +60,9 @@ export const dashboardTheme = createTheme({
             color: theme.palette.secondary.main,
           }),
         label: {
-          padding: '20px',
-        }
+          padding: "20px",
+        },
       },
     },
-  }
+  },
 });
