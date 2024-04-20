@@ -17,7 +17,7 @@ module.exports.sendStaticWebPage = (res, eventId, mediaId, next) => {
   try {
     https
       .request(
-        `https://static.jaminproductions.com/emc/${eventId}/${mediaId}.html`,
+        `https://static.jaminproductions.com/emc/events/${eventId}/html/${mediaId}.html`,
         (externalRes) => {
           res.setHeader("content-disposition", "inline");
           res.setHeader("content-type", "text/html");

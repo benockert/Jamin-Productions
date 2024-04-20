@@ -39,7 +39,7 @@ function Dashboard() {
         toggleError={toggleError}
       >
         <SelectScreensView
-          data={screens}
+          screens={screens}
           redirectPageCallback={redirectToMediaPage}
         ></SelectScreensView>
       </DashboardLayout>

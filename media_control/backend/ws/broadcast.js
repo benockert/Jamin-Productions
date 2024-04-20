@@ -8,13 +8,18 @@ module.exports.handler = async (event, context) => {
     const keys = streamRecord.dynamodb.Keys;
     const newEntry = streamRecord.dynamodb.NewImage;
 
+    // flatten types
+    for (const [key, value] of Object.entries(newEntry)) {
+      newEntry[key] = Object.values(value)[0];
+    }
+
     // determine what type of object was updated
     const keyType = keys.key.S.split(".")[0];
     if (keyType == "screen") {
       const broadcastData = {
         action: "screen_change",
         screenId: keys.key.S,
-        newMediaId: newEntry.current_media_id.S,
+        newState: newEntry,
       };
       return screenHandler
         .broadcastScreenChangesHandler(

@@ -12,21 +12,34 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 
 export default function ChooseMediaPopupDialog({
-  openDialog,
+  screen,
   media,
   handleClose,
   handleSubmit,
-  selected,
-  setSelected,
 }) {
+  const [selectedMediaId, setSelectedMediaId] = useState(
+    screen.current_media_id
+  );
+
   const handleChange = (event) => {
-    setSelected(event.target.value || "");
+    event.preventDefault();
+    setSelectedMediaId(event.target.value || "");
   };
+
+  const options = Array.from(Object.values(media)).map((m) => {
+    return (
+      m.orientation == screen.orientation && (
+        <MenuItem key={m.id} value={m.id}>
+          {m.short_name}
+        </MenuItem>
+      )
+    );
+  });
 
   return (
     <div>
-      <Dialog disableEscapeKeyDown open={!!openDialog} onClose={handleClose}>
-        <DialogTitle>{openDialog.screen_name}</DialogTitle>
+      <Dialog disableEscapeKeyDown open={!!screen} onClose={handleClose}>
+        <DialogTitle>{screen.name}</DialogTitle>
         <DialogContent>
           <Box component="form" sx={{ display: "flex", flexWrap: "wrap" }}>
             <FormControl sx={{ m: 1, width: 300 }}>
@@ -36,26 +49,20 @@ export default function ChooseMediaPopupDialog({
               <Select
                 labelId="demo-dialog-select-label"
                 id="demo-dialog-select"
-                value={selected}
+                value={selectedMediaId}
                 onChange={handleChange}
                 input={<OutlinedInput label="Select new media" />}
               >
-                {media.map((m) => {
-                  return (
-                    m.orientation == openDialog.orientation && (
-                      <MenuItem key={m.id} value={m.id}>
-                        {m.short_name}
-                      </MenuItem>
-                    )
-                  );
-                })}
+                {options}
               </Select>
             </FormControl>
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={(event) => handleSubmit(event, selected)}>
+          <Button
+            onClick={(event) => handleSubmit(event, screen.id, selectedMediaId)}
+          >
             Submit
           </Button>
         </DialogActions>

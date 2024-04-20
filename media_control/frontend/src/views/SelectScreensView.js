@@ -19,12 +19,12 @@ const Item = styled(Card)(({ theme }) => ({
     OTransition: "all .2s ease",
     WebkitTransition: "all .2s ease",
     transform: "scale(1.05)",
-    transition: ".4s ease",
     backgroundColor: theme.palette.background.grey,
   },
 }));
 
-function SelectScreensView({ data: screens, redirectPageCallback }) {
+// todo update to const
+const SelectScreensView = ({ screens, redirectPageCallback }) => {
   if (screens) {
     return (
       <>
@@ -81,6 +81,6 @@ function SelectScreensView({ data: screens, redirectPageCallback }) {
   } else {
     return <div></div>;
   }
-}
+};
 
 export default SelectScreensView;
