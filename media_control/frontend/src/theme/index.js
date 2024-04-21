@@ -42,6 +42,27 @@ export const dashboardTheme = createTheme({
     },
     divider: "rgba(255, 255, 255, 0.12)",
   },
+  typography: {
+    h3: {
+      fontFamily: ["Elaine Sans", "sans-serif"].join(","),
+      fontSize: 26,
+    },
+    h5: {
+      fontFamily: ["Red Hat Text", "sans-serif"].join(","),
+      fontSize: 22,
+      fontWeight: "600",
+    },
+    h6: {
+      fontFamily: ["Red Hat Text", "sans-serif"].join(","),
+      fontSize: 18,
+      fontWeight: "600",
+    },
+    body2: {
+      fontFamily: ["Red Hat Text", "sans-serif"].join(","),
+      fontSize: 16,
+      fontWeight: "500",
+    },
+  },
   breakpoints: {
     values: {
       xs: 0,
@@ -61,6 +82,15 @@ export const dashboardTheme = createTheme({
           }),
         label: {
           padding: "20px",
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          ":hover": {
+            borderWidth: 2,
+          },
         },
       },
     },

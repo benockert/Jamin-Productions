@@ -10,13 +10,18 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
+import Slider from "@mui/material/Slider";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import Typography from "@mui/material/Typography";
 
-export default function ChooseMediaPopupDialog({
+export const ChooseMediaPopupDialog = ({
   screen,
   media,
   handleClose,
   handleSubmit,
-}) {
+}) => {
   const [selectedMediaId, setSelectedMediaId] = useState(
     screen.current_media_id
   );
@@ -28,7 +33,7 @@ export default function ChooseMediaPopupDialog({
 
   const options = Array.from(Object.values(media)).map((m) => {
     return (
-      m.orientation == screen.orientation && (
+      m.orientation === screen.orientation && (
         <MenuItem key={m.id} value={m.id}>
           {m.short_name}
         </MenuItem>
@@ -69,4 +74,41 @@ export default function ChooseMediaPopupDialog({
       </Dialog>
     </div>
   );
-}
+};
+
+export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
+  const [volume, setVolume] = useState(Number(screen.playback_volume) ?? 0);
+
+  const handleVolumeChange = (event, newVolume) => {
+    setVolume(newVolume);
+  };
+
+  return (
+    <Dialog onClose={handleClose} open={!!screen}>
+      <DialogTitle>
+        <Typography variant="body2" color="text.secondary">
+          Playback volume
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <Box sx={{ width: 200, padding: 1 }}>
+          <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
+            <VolumeOffIcon />
+            <Slider
+              min={0}
+              max={100}
+              aria-label="Volume"
+              value={volume}
+              onChange={handleVolumeChange}
+              onChangeCommitted={() => handleSubmit(volume)}
+            />
+            <VolumeUpIcon />
+          </Stack>
+        </Box>
+      </DialogContent>
+      <DialogActions sx={{ marginTop: -3 }}>
+        <Button onClick={handleClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
+};

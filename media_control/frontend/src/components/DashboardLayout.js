@@ -55,30 +55,41 @@ function DashboardLayout({ title, event, error, toggleError, children }) {
         >
           <Box
             sx={{
-              my: 4,
-              mx: 4,
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
             }}
           >
-            {event?.header_image_url ? (
+            <Typography
+              sx={{
+                backgroundColor: "#696768",
+                color: "secondary.main",
+                mb: 4,
+                width: "100%",
+                p: 0.5,
+              }}
+              align="center"
+              variant="h3"
+            >
+              EVENT MEDIA CONTROL
+            </Typography>
+            {event.header_image_url ? (
               <Box
                 component="img"
-                src={event?.header_image_url}
-                sx={{ width: "clamp(350px, 70%, 85%)" }}
+                src={event.header_image_url}
+                sx={{ width: "clamp(350px, 70%, 85%)", mb: 4 }}
               />
             ) : (
               <Typography
-                sx={{ color: "secondary.main", mt: 2 }}
+                sx={{ color: "secondary.main", mb: 4 }}
                 align="center"
                 variant="h3"
               >
-                {event?.name}
+                {event.name}
               </Typography>
             )}
             <SectionDivider
-              sx={{ color: "secondary.main", m: 4 }}
+              sx={{ color: "secondary.main", mb: 4 }}
               align="center"
               variant="h6"
             >
@@ -91,7 +102,13 @@ function DashboardLayout({ title, event, error, toggleError, children }) {
           open={!!error}
           autoHideDuration={5000}
           onClose={toggleError}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+          sx={{
+            minWidth: "25%",
+          }}
         >
           <Alert variant="filled" severity="error" sx={{ width: "100%" }}>
             {error}

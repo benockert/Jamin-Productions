@@ -6,58 +6,65 @@ import Button from "@mui/material/Button";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import IconButton from "@mui/material/IconButton";
 import { styled } from "@mui/system";
 
 const Item = styled(Card)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.main,
-  marginBottom: 50,
+  marginBottom: 30,
   height: "auto",
+  maxWidth: "100%",
+  width: "100vw",
+  borderStyle: "solid",
+  borderWeight: 2,
+  borderColor: theme.palette.secondary.main,
 }));
 
-const ActiveScreen = ({ screen, allMedia, onClickCallback }) => {
+const ActiveScreen = ({
+  screen,
+  allMedia,
+  onUpdateClickCallback,
+  onVolumeClickCallback,
+}) => {
   return (
     <Grid item xs={10} sm={9} md={8} lg={7} xl={6} key={`screen_${screen.id}`}>
       <Card component={Item}>
         <CardMedia
-          className="screen-image"
           component="img"
+          alt=""
+          height="170"
           image={allMedia[`media.${screen.current_media_id}`]?.image_url ?? ""}
-          sx={{ objectFit: "contain" }}
         />
         <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
+          <Typography variant="h5" component="div">
             {screen.name}
           </Typography>
-          {/* <Typography variant="h5" component="div">
-                {screenSchedule[screenUrl] ? (
-                  <NextChip
-                    icon={<CastConnectedIcon />}
-                    label={`Next: ${
-                      screenSchedule[screenUrl].target_media_name
-                    } at ${new Date(
-                      screenSchedule[screenUrl].time
-                    ).toLocaleTimeString()}
-                    `}
-                  />
-                ) : (
-                  <NextChip
-                    icon={<WebAssetOffIcon />}
-                    label="Screen is not scheduled"
-                  />
-                )}
-              </Typography> */}
         </CardContent>
         <CardActions>
           <Button
             variant="outlined"
-            sx={{ width: "100%" }}
+            sx={{
+              width: "100%",
+              borderWidth: 2,
+            }}
             xs={9}
             sm={9}
             md={9}
-            onClick={() => onClickCallback(screen)}
+            onClick={() => onUpdateClickCallback(screen)}
           >
             Update
           </Button>
+          {screen.playback_enabled && (
+            <IconButton xs={3} onClick={() => onVolumeClickCallback(screen)}>
+              {Number(screen.playback_volume) === 0 ? (
+                <VolumeOffIcon />
+              ) : (
+                <VolumeUpIcon sx={{ color: "primary.main" }} />
+              )}
+            </IconButton>
+          )}
         </CardActions>
       </Card>
     </Grid>
@@ -69,13 +76,13 @@ const InactiveScreen = ({ screen }) => {
     <Grid item xs={10} sm={9} md={8} lg={7} xl={6} key={`screen_${screen.id}`}>
       <Card component={Item}>
         <CardMedia
-          className="screen-image"
           component="img"
-          image="https://static.jaminproductions.com/emc/images/screen_not_online.jpg"
-          sx={{ objectFit: "contain" }}
+          alt=""
+          height="170"
+          image="https://static.jaminproductions.com/emc/images/screen_offline_lg.png"
         />
         <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
+          <Typography variant="h5" component="div">
             {screen.name}
           </Typography>
         </CardContent>
@@ -85,7 +92,12 @@ const InactiveScreen = ({ screen }) => {
 };
 
 // TODO: sorting to put inactive at bottom always
-const AdminScreensView = ({ screens, media, openChoseMediaDialog }) => {
+const AdminScreensView = ({
+  screens,
+  media,
+  openChoseMediaDialog,
+  openVolumeControlDialog,
+}) => {
   return screens ? (
     <>
       {Array.from(Object.values(screens)).map((screen, idx) => {
@@ -93,10 +105,12 @@ const AdminScreensView = ({ screens, media, openChoseMediaDialog }) => {
           <ActiveScreen
             screen={screen}
             allMedia={media}
-            onClickCallback={openChoseMediaDialog}
+            onUpdateClickCallback={openChoseMediaDialog}
+            onVolumeClickCallback={openVolumeControlDialog}
+            key={screen.id}
           ></ActiveScreen>
         ) : (
-          <InactiveScreen screen={screen}></InactiveScreen>
+          <InactiveScreen screen={screen} key={screen.id}></InactiveScreen>
         );
       })}
     </>

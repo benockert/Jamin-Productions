@@ -50,21 +50,16 @@ const SelectScreensView = ({ screens, redirectPageCallback }) => {
                   }
                 >
                   <CardMedia
-                    className="screen-image"
                     component="img"
-                    height="140"
+                    alt=""
+                    height="170"
                     image={screen.image_url}
-                    alt={screen.description}
                   />
                   <CardContent>
                     <Typography gutterBottom variant="h5" component="div">
                       {screen.name}
                     </Typography>
-                    <Typography
-                      gutterBottom
-                      variant="body2"
-                      color="text.secondary"
-                    >
+                    <Typography variant="body2" color="text.secondary">
                       {screen.description}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
