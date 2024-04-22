@@ -1,88 +1,56 @@
+const eventHandler = require("../Events/handler.js");
 const { DynamoDBClient } = require("@aws-sdk/client-dynamodb");
 const {
   DynamoDBDocumentClient,
   PutCommand,
   GetCommand,
 } = require("@aws-sdk/lib-dynamodb");
-const express = require("express");
-const serverless = require("serverless-http");
 var request = require("request");
-
-const app = express();
-const dynamoDbClient = DynamoDBDocumentClient.from(new DynamoDBClient());
 const spotifyAuthClient = DynamoDBDocumentClient.from(
   new DynamoDBClient({ region: "us-east-1" })
 ); // spotify auth table is only in us-east-1
 
-app.use(express.json());
-app.use(express.urlencoded()); // needed to handle form-data submissions
-
-app.use((req, res, next) => {
-  console.log("New request at time:", Date.now(), "to path", req.path);
-  console.log("Request body:", req.body);
-
-  // call so continues to routes
-  next();
-});
-
-app.post("/spotify/:eventId/add_to_playlist", async function (req, res) {
-  const eventId = req.params.eventId;
-  if (!eventId) {
-    res.status(404).json({
-      result: "error",
-      message: "Event not found",
-    });
-  } else {
-    const params = {
-      TableName: process.env.EVENTS_TABLE,
-      Key: {
-        event_id: eventId.toLowerCase(),
-      },
-    };
-
-    const { Item } = await dynamoDbClient.send(new GetCommand(params));
-    if (Item) {
-      const { playlist_id: playlistId } = Item;
-      if (playlistId) {
-        getAccessToken(
-          (...args) => addSongToPlaylist(playlistId, ...args),
-          req,
-          res
-        );
+module.exports.addToPlaylist = async (eventId, req, res, next) => {
+  eventHandler.getEvent(eventId, "requests").then(
+    (event) => {
+      if (event.status === 200) {
+        if (event) {
+          const { playlist_id: playlistId } = event;
+          if (playlistId) {
+            getAccessToken(
+              (...args) => addSongToPlaylist(playlistId, ...args),
+              req,
+              res
+            );
+          } else {
+            res.statusCode(405).json({
+              status: 405,
+              message: "This event does not support playlist integration.",
+            });
+          }
+        } else {
+          res.statusCode(404).json({
+            status: 404,
+            message: `No active event found with id ${eventId}`,
+          });
+        }
       } else {
-        res.statusCode(405).json({
-          status: 405,
-          message: "This event does not support playlist integration.",
-        });
+        res.status(event.status).json(event);
       }
+    },
+    (err) => {
+      next(err);
     }
-  }
-});
+  );
+};
 
-app.use((req, res, next) => {
-  return res.status(404).json({
-    result: "error",
-    message: "Path not found",
-  });
-});
+module.exports.setVolume = async (newVolume, req, res, next) => {
+  getAccessToken((...args) => setVolume(newVolume, ...args), req, res, next);
+};
 
-// error hander
-app.use((err, req, res, next) => {
-  console.log("INTERNAL SERVER ERROR", err);
-  if (res.headersSent) {
-    return next(err);
-  }
-  res.status(500).json({ error: err });
-});
+// ==================== HELPERS ======================
 
-// for local testing
-// app.listen(3030, () => {
-//   console.log(`Example app listening on port 3030`);
-// });
-module.exports.handler = serverless(app);
-
-/// ================= HELPERS =================
-
+// next: the function to call once the access token is retrieved or refreshed
 const getAccessToken = async (next, req, res) => {
   console.log("Getting Spotify access token");
 
@@ -172,6 +140,8 @@ const updateAccessToken = async ({
   await spotifyAuthClient.send(new PutCommand(params));
 };
 
+// ==================== ADD SONG TO PLAYLIST ====================
+
 // effective signature is (playlistId, accessToken, req, res)
 const addSongToPlaylist = async (playlistId, ...args) => {
   // destructure function arguments
@@ -247,6 +217,30 @@ const searchForSong = async (song, artist, accessToken, next) => {
     (err, res, body) => {
       const json = JSON.parse(body);
       next(json.tracks?.items[0]?.uri);
+    }
+  );
+};
+
+// ==================== SET VOLUME ====================
+
+// set the volume, and update the tables current volume on success
+const setVolume = (newVolume, accessToken, req, res) => {
+  const url = `https://api.spotify.com/v1/me/player/volume?volume_percent=${newVolume}`;
+  request.put(
+    url,
+    {
+      auth: {
+        bearer: accessToken,
+      },
+    },
+    (err, internalRes, body) => {
+      if (internalRes.statusCode !== 204) {
+        console.log("Unexpected response during set volume:", {
+          status: internalRes.statusCode,
+          body,
+        });
+      }
+      res.status(internalRes.statusCode).send();
     }
   );
 };

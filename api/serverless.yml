@@ -115,7 +115,7 @@ functions:
     timeout: 10
     name: jp-events-handler-${sls:stage}
     description: "Handler for event information requests"
-    handler: Events/index.handler
+    handler: Events/routes.handler
     events:
       - httpApi: "GET /events/{eventId}"
     # role:
@@ -124,7 +124,7 @@ functions:
     timeout: 10
     name: song-requests-form-handler-${sls:stage}
     description: "Handler for song request form submissions"
-    handler: Requests/index.handler
+    handler: Requests/routes.handler
     events:
       - httpApi: "GET /requests/{eventId}"
       - httpApi: "POST /requests/{eventId}"
@@ -134,7 +134,7 @@ functions:
     timeout: 10
     name: interactive-media-form-handler-${sls:stage}
     description: "Handler for media submissions"
-    handler: InteractiveMedia/index.handler
+    handler: InteractiveMedia/routes.handler
     events:
       - httpApi: "GET /media/{eventId}/photo_mosaic"
       - httpApi: "POST /media/{eventId}/photo_mosaic"
@@ -144,9 +144,10 @@ functions:
     timeout: 10
     name: requests-spotify-integration-${sls:stage}
     description: "Handler for adding requested songs to spotify playlists"
-    handler: Spotify/index.handler
+    handler: Spotify/routes.handler
     events:
-      - httpApi: "*"
+      - httpApi: "PUT /spotify/volume"
+      - httpApi: "POST /spotify/{eventId}/add_to_playlist"
     # role:
 
 resources:
