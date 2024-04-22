@@ -27,8 +27,6 @@ app.get(`/v1/${route}/`, auth(1), (req, res, next) => {
   mediaHandler.getMedia(res, next);
 });
 
-// no need for catch-all as we don't have a * wildcard in serverless template
-
 // error handler
 app.use((err, req, res, next) => {
   console.error(err);

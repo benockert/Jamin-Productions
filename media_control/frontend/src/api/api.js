@@ -62,10 +62,10 @@ export function get_screens(token) {
   return api_get(path, token);
 }
 
-export function get_session(access_code) {
+export function get_session(accessCode) {
   const path = `v1/session`;
   const body = {
-    access_code,
+    access_code: accessCode,
   };
   return api_post(path, body);
 }
@@ -78,8 +78,8 @@ export function validate_token(token) {
   return api_post(path, body);
 }
 
-export function get_screen_media(screen_url, token) {
-  const path = `v1/media/${screen_url}`;
+export function get_screen_media(screenId, token) {
+  const path = `v1/media/${screenId}`;
   return api_get(path, token);
 }
 
@@ -91,15 +91,15 @@ export function update_screen_media(token, screenId, mediaId) {
   return api_put(path, body, token);
 }
 
-export function set_playback_volume(token, new_volume) {
-  const path = `v1/playback/music/volume?level=${new_volume}`;
+export function set_playback_volume(token, eventId, screenId, newVolume) {
+  const path = `v1/playback/${eventId}/screens/${screenId}/volume?v=${newVolume}`;
   return api_put(path, {}, token);
 }
 
-export function update_video_playback(token, screen_url, action) {
+export function update_video_playback(token, screenId, action) {
   const path = `v1/playback/video`;
   const body = {
-    screen: screen_url,
+    screen: screenId,
     action: action,
   };
   return api_post(path, body, token);

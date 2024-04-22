@@ -37,8 +37,6 @@ app.get(`/v1/:eventId/screens/:screenId/media`, (req, res, next) => {
   screenHandler.getCurentMediaOfScreen(res, eventId, screenId, next);
 });
 
-// no need for catch-all as we don't have a * wildcard in serverless template
-
 // error handler
 app.use((err, req, res, next) => {
   console.error(err);

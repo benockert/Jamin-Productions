@@ -15,10 +15,7 @@ custom:
   websocketConnectionsTableName: "event-media-control-websocket-connections-${sls:stage}"
   stackName: "event-media-control-api-backend-stack-${sls:stage}"
   domainName: "event-media-control.com"
-
-  jaminProductionsApi:
-    dev: https://pm0v1kb80m.execute-api.us-west-2.amazonaws.com
-    prod: https://api.jaminproductions.com
+  jaminProductionsApi: https://api.jaminproductions.com
 
   # NOTE: will need to update this in case of a stack recreation
   websocketCallbackUrl:
@@ -95,7 +92,7 @@ provider:
     WEBSOCKET_CONNECTIONS_TABLE: ${self:custom.websocketConnectionsTableName}
     AUTH_TABLE: ${self:custom.authTableName}
     JWT_SECRET: ${ssm:event-media-control-jwt-secret}
-    JP_API_URL: ${self:custom.jaminProductionsApi.${opt:stage, self:provider.stage}}
+    JP_API_URL: ${self:custom.jaminProductionsApi}
     WS_CALLBACK_URL: ${self:custom.websocketCallbackUrl.${opt:stage, self:provider.stage}}
     APP_STAGE: ${sls:stage}
     APP_REGION: ${opt:region, self:provider.region}
@@ -155,6 +152,17 @@ functions:
     events:
       - httpApi: "GET /v1/{eventId}/screens/{screenId}/media"
       - httpApi: "GET /v1/html/{eventId}/{screenId}/{mediaId}"
+    # role:
+  playbackHandler:
+    memorySize: 512
+    timeout: 10
+    name: event-media-control-playback-handler-${sls:stage}
+    description: "Handler for public Spotify playback endpoints"
+    handler: http/routes/playback.handler
+    events:
+      - httpApi: "PUT /v1/playback/{eventId}/screens/{screenId}/volume"
+      - httpApi: "PUT /v1/playback/{eventId}/screens/{screenId}/mute"
+      - httpApi: "PUT /v1/playback/{eventId}/screens/{screenId}/unmute"
     # role:
 
   # websocket handlers

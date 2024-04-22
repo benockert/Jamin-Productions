@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -77,38 +77,49 @@ export const ChooseMediaPopupDialog = ({
 };
 
 export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
-  const [volume, setVolume] = useState(Number(screen.playback_volume) ?? 0);
+  const [volume, setVolume] = useState(parseInt(screen.playback_volume));
 
   const handleVolumeChange = (event, newVolume) => {
     setVolume(newVolume);
   };
 
-  return (
-    <Dialog onClose={handleClose} open={!!screen}>
-      <DialogTitle>
-        <Typography variant="body2" color="text.secondary">
-          Playback volume
-        </Typography>
-      </DialogTitle>
-      <DialogContent>
-        <Box sx={{ width: 200, padding: 1 }}>
-          <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
-            <VolumeOffIcon />
-            <Slider
-              min={0}
-              max={100}
-              aria-label="Volume"
-              value={volume}
-              onChange={handleVolumeChange}
-              onChangeCommitted={() => handleSubmit(volume)}
-            />
-            <VolumeUpIcon />
-          </Stack>
-        </Box>
-      </DialogContent>
-      <DialogActions sx={{ marginTop: -3 }}>
-        <Button onClick={handleClose}>Close</Button>
-      </DialogActions>
-    </Dialog>
-  );
+  useEffect(() => {
+    setVolume(parseInt(screen.playback_volume));
+  }, [screen.playback_volume]);
+
+  if (volume) {
+    return (
+      <Dialog onClose={handleClose} open={!!screen}>
+        <DialogTitle>
+          <Typography variant="body2" color="text.secondary">
+            Playback volume
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ width: 200, padding: 1 }}>
+            <Stack
+              spacing={2}
+              direction="row"
+              sx={{ mb: 1 }}
+              alignItems="center"
+            >
+              <VolumeOffIcon />
+              <Slider
+                min={0}
+                max={100}
+                aria-label="Volume"
+                value={volume}
+                onChange={handleVolumeChange}
+                onChangeCommitted={() => handleSubmit(volume)}
+              />
+              <VolumeUpIcon />
+            </Stack>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ marginTop: -3 }}>
+          <Button onClick={handleClose}>Close</Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
 };

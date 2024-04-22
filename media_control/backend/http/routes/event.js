@@ -27,8 +27,6 @@ app.get(`/v1/${route}/`, auth(1), (req, res, next) => {
   eventHandler.getEvent(res, next);
 });
 
-// no need for catch-all as we don't have a * wildcard in serverless template
-
 // error handler
 app.use((err, req, res, next) => {
   console.error(err);
@@ -43,6 +41,6 @@ app.use((err, req, res, next) => {
 
 // for local testing
 app.listen(3033, () => {
-  console.log(`Example app listening on port 3031`);
+  console.log(`Example app listening on port 3033`);
 });
 module.exports.handler = serverless(app);

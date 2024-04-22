@@ -1,4 +1,4 @@
-const sessionHandler = require("../../handlers/session");
+const screenHandler = require("../../handlers/screens");
 const express = require("express");
 const serverless = require("serverless-http");
 
@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded()); // needed to handle form-data submissions
 
-const route = "session";
+const route = "playback";
 
 app.use((req, res, next) => {
   console.log(
@@ -22,24 +22,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.post(`/v1/${route}/`, (req, res, next) => {
-  const accessCode = req.body.access_code;
-
-  if (accessCode) {
-    sessionHandler.generateToken(res, accessCode, next);
-  } else {
-    res.status(400).send({ status: 400, message: "Missing access code" });
-  }
-});
-
-app.post(`/v1/${route}/validate`, (req, res, next) => {
-  const token = req.body.jwt;
-
-  if (token) {
-    sessionHandler.validateToken(res, token, next);
-  } else {
-    res.status(400).send({ status: 400, message: "Missing token" });
-  }
+// TODO: move to playback routes, make mute and unmute endpoint
+app.put(`/v1/${route}/:eventId/screens/:screenId/volume`, (req, res, next) => {
+  const eventId = req.params.eventId;
+  const screenId = `screen.${req.params.screenId}`;
+  const volume = req.query.v;
+  screenHandler.setVolumeOfScreen(res, eventId, screenId, volume, next);
 });
 
 // error handler
@@ -55,7 +43,7 @@ app.use((err, req, res, next) => {
 });
 
 // for local testing
-app.listen(3032, () => {
-  console.log(`Example app listening on port 3032`);
+app.listen(3035, () => {
+  console.log(`Example app listening on port 3035`);
 });
 module.exports.handler = serverless(app);

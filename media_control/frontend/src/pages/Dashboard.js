@@ -36,7 +36,7 @@ function Dashboard() {
     window.location.href = `${API_HOST}/v1/html/${event_id}/${screen_id}/${media_id}`;
   };
 
-  if (event) {
+  if (isLoaded) {
     return (
       <DashboardLayout
         title="Screen Selection"

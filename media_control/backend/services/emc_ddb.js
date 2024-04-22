@@ -74,8 +74,7 @@ module.exports.getScreens = async (eventId, lek) => {
 };
 
 module.exports.getScreen = async (eventId, screenId) => {
-  const screenKey = screenId;
-  return await getItem(eventId, screenKey);
+  return await getItem(eventId, screenId);
 };
 
 module.exports.getMedia = async (eventId, lek) => {
@@ -83,17 +82,18 @@ module.exports.getMedia = async (eventId, lek) => {
 };
 
 // full screen id i.e. screen.test
-module.exports.updateScreenWithNewMedia = async (
+module.exports.updateScreenWithNewValue = async (
   eventId,
   screenId,
-  newMediaId
+  valueKey,
+  newValue
 ) => {
   const screenKey = screenId;
   const updateParams = {
     UpdateExpression: "set #k = :v",
-    ExpressionAttributeNames: { "#k": "current_media_id" },
+    ExpressionAttributeNames: { "#k": valueKey },
     ExpressionAttributeValues: {
-      ":v": newMediaId,
+      ":v": newValue,
     },
   };
   return await updateItem(eventId, screenKey, updateParams);

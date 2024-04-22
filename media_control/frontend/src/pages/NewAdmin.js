@@ -4,8 +4,9 @@ import {
   get_screens,
   get_media,
   update_screen_media,
+  set_playback_volume,
+  SOCKET_HOST,
 } from "../api/api.js";
-import { SOCKET_HOST } from "../api/api.js";
 import DashboardLayout from "../components/DashboardLayout";
 import AdminScreensView from "../views/AdminScreensView";
 import {
@@ -66,13 +67,18 @@ function NewAdmin() {
         case "screen_change":
           const screenId = message.screenId;
           const newScreenState = message.newState;
+          // update our screens in state
           setScreens({ ...screens, [screenId]: newScreenState });
+          // if the updated screen is also the currenly open media dialog, update that
+          if (openVolumeControlDialog.key === screenId) {
+            setOpenVolumeControlDialog(newScreenState);
+          }
           break;
         default:
           console.log("No action to take for:", message.action);
       }
     },
-    [screens]
+    [screens, openVolumeControlDialog]
   );
 
   useEffect(() => {
@@ -132,12 +138,18 @@ function NewAdmin() {
   };
 
   const onVolumeChangeCommitted = (newVolume) => {
-    // set_playback_volume(token.current, dialogVolume).then((resp) => {
-    //   if (resp.status != 204) {
-    //     setError(resp.body.message);
-    //   }
-    // });
-    console.log("New volume", newVolume);
+    set_playback_volume(
+      token.current,
+      openVolumeControlDialog.event_id,
+      openVolumeControlDialog.id,
+      newVolume
+    ).then(
+      (resp) => {},
+      (err) => {
+        console.error(err);
+        setError("An error ocurred updating the volume.");
+      }
+    );
   };
 
   const onSetVolumeDialogClose = () => {

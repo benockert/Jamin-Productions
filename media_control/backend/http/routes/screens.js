@@ -35,8 +35,6 @@ app.put(`/v1/${route}/:screenId/media`, auth(2), (req, res, next) => {
   screenHandler.updateSource(res, screenId, newMediaId, next);
 });
 
-// no need for catch-all as we don't have a * wildcard in serverless template
-
 // error handler
 app.use((err, req, res, next) => {
   console.error(err);
@@ -50,7 +48,7 @@ app.use((err, req, res, next) => {
 });
 
 // for local testing
-app.listen(3030, () => {
-  console.log(`Example app listening on port 3030`);
+app.listen(3034, () => {
+  console.log(`Example app listening on port 3034`);
 });
 module.exports.handler = serverless(app);
