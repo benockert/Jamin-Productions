@@ -82,18 +82,50 @@ module.exports.getMedia = async (eventId, lek) => {
 };
 
 // full screen id i.e. screen.test
-module.exports.updateScreenWithNewValue = async (
+module.exports.updateScreenWithNewMedia = async (
   eventId,
   screenId,
-  valueKey,
-  newValue
+  newMediaId
 ) => {
   const screenKey = screenId;
   const updateParams = {
     UpdateExpression: "set #k = :v",
-    ExpressionAttributeNames: { "#k": valueKey },
+    ExpressionAttributeNames: { "#k": "current_media_id" },
     ExpressionAttributeValues: {
-      ":v": newValue,
+      ":v": newMediaId,
+    },
+  };
+  return await updateItem(eventId, screenKey, updateParams);
+};
+
+// update current volume as well as default volume
+module.exports.updateScreenVolumeAndDefault = async (
+  eventId,
+  screenId,
+  newVolume
+) => {
+  const screenKey = screenId;
+  const updateParams = {
+    UpdateExpression: "set #k1 = :v1, #k2 = :v1",
+    ExpressionAttributeNames: {
+      "#k1": "current_playback_volume",
+      "#k2": "default_playback_volume",
+    },
+    ExpressionAttributeValues: {
+      ":v1": newVolume,
+    },
+  };
+  return await updateItem(eventId, screenKey, updateParams);
+};
+
+// only adjust current screen volume, keep default screen volume alone for unmute purposes
+module.exports.updateScreenVolume = async (eventId, screenId, newVolume) => {
+  const screenKey = screenId;
+  const updateParams = {
+    UpdateExpression: "set #k = :v",
+    ExpressionAttributeNames: { "#k": "current_playback_volume" },
+    ExpressionAttributeValues: {
+      ":v": newVolume,
     },
   };
   return await updateItem(eventId, screenKey, updateParams);

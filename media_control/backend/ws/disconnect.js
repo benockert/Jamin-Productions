@@ -21,10 +21,9 @@ module.exports.handler = async (event, context) => {
       if (channel.includes("screen")) {
         const screenId = channel.substring(channel.indexOf(".") + 1);
         // also remove the current media entry for the disconnected screen
-        deleteCurrentMediaStatus = await ddb.updateScreenWithNewValue(
+        deleteCurrentMediaStatus = await ddb.updateScreenWithNewMedia(
           channelConnection.event_id,
           screenId,
-          "current_media_id",
           "" // nothing
         );
       }

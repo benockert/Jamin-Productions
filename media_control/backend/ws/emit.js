@@ -11,10 +11,9 @@ module.exports.handler = async (event, context) => {
         const eventId = body.event_id;
         const loadedScreenId = body.screen_id;
         const loadedMediaId = body.media_id;
-        statusCode = await ddb.updateScreenWithNewValue(
+        statusCode = await ddb.updateScreenWithNewMedia(
           eventId,
           loadedScreenId,
-          "current_media_id",
           loadedMediaId
         );
         break;
