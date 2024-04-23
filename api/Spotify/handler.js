@@ -240,7 +240,7 @@ const setVolume = (newVolume, accessToken, req, res) => {
           body,
         });
       }
-      res.status(internalRes.statusCode).send();
+      res.status(internalRes.statusCode).send(body);
     }
   );
 };

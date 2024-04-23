@@ -1,15 +1,14 @@
-setTimeout(() => {
-  const eventId = window.location.pathname.split("/")[3];
-  const screenId = window.location.pathname.split("/")[4];
-  const mediaId = window.location.pathname.split("/")[5];
-
-  const socket = new WebSocket(
+const setupSocket = (eventId, screenId, mediaId) => {
+  let socket = new WebSocket(
     "wss://7u2mqu2n2i.execute-api.us-east-1.amazonaws.com/dev"
   );
 
   // Connection opened
-  socket.onopen = (event) => {
-    // subscribe to a channel to listen for changes to media source, etc.
+  socket.onopen = () => {
+    console.log(
+      "Socket connected, subscribing to channel for screen updates and sending load message"
+    );
+    //subscribe to a channel to listen for changes to media source, etc.
     socket.send(
       JSON.stringify({
         action: "subscribe",
@@ -43,4 +42,20 @@ setTimeout(() => {
         console.log("No action to take for socket message:", action);
     }
   };
-}, 1000);
+
+  // handle closed connections
+  socket.onclose = (event) => {
+    console.log("Socket closed, reopening...");
+    setupSocket(eventId, screenId, mediaId);
+  };
+};
+
+setTimeout(() => {
+  const eventId = window.location.pathname.split("/")[3];
+  const screenId = window.location.pathname.split("/")[4];
+  const mediaId = window.location.pathname.split("/")[5];
+
+  if (eventId && screenId && mediaId) {
+    setupSocket(eventId, screenId, mediaId);
+  }
+}, 200);
