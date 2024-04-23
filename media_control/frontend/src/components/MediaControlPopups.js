@@ -31,9 +31,13 @@ export const ChooseMediaPopupDialog = ({
     setSelectedMediaId(event.target.value || "");
   };
 
+  useEffect(() => {
+    setSelectedMediaId(screen.current_media_id);
+  }, [screen.current_media_id]);
+
   const options = Array.from(Object.values(media)).map((m) => {
     return (
-      m.orientation === screen.orientation && (
+      m.orientation === parseInt(screen.orientation) && (
         <MenuItem key={m.id} value={m.id}>
           {m.short_name}
         </MenuItem>
@@ -77,49 +81,46 @@ export const ChooseMediaPopupDialog = ({
 };
 
 export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
-  const [volume, setVolume] = useState(parseInt(screen.playback_volume));
+  const [volume, setVolume] = useState(
+    parseInt(screen.current_playback_volume)
+  );
 
   const handleVolumeChange = (event, newVolume) => {
+    event.preventDefault();
+    // TODO: errored on 0
     setVolume(newVolume);
   };
 
   useEffect(() => {
-    setVolume(parseInt(screen.playback_volume));
-  }, [screen.playback_volume]);
+    setVolume(parseInt(screen.current_playback_volume));
+  }, [screen.current_playback_volume]);
 
-  if (volume) {
-    return (
-      <Dialog onClose={handleClose} open={!!screen}>
-        <DialogTitle>
-          <Typography variant="body2" color="text.secondary">
-            Playback volume
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ width: 200, padding: 1 }}>
-            <Stack
-              spacing={2}
-              direction="row"
-              sx={{ mb: 1 }}
-              alignItems="center"
-            >
-              <VolumeOffIcon />
-              <Slider
-                min={0}
-                max={100}
-                aria-label="Volume"
-                value={volume}
-                onChange={handleVolumeChange}
-                onChangeCommitted={() => handleSubmit(volume)}
-              />
-              <VolumeUpIcon />
-            </Stack>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ marginTop: -3 }}>
-          <Button onClick={handleClose}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    );
-  }
+  return (
+    <Dialog onClose={handleClose} open={!!screen}>
+      <DialogTitle>
+        <Typography variant="body2" color="text.secondary">
+          Playback volume
+        </Typography>
+      </DialogTitle>
+      <DialogContent>
+        <Box sx={{ width: 200, padding: 1 }}>
+          <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
+            <VolumeOffIcon />
+            <Slider
+              min={0}
+              max={100}
+              aria-label="Volume"
+              value={volume}
+              onChange={handleVolumeChange}
+              onChangeCommitted={() => handleSubmit(volume)}
+            />
+            <VolumeUpIcon />
+          </Stack>
+        </Box>
+      </DialogContent>
+      <DialogActions sx={{ marginTop: -3 }}>
+        <Button onClick={handleClose}>Close</Button>
+      </DialogActions>
+    </Dialog>
+  );
 };

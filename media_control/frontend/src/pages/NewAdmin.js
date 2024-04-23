@@ -83,15 +83,29 @@ function NewAdmin() {
 
   useEffect(() => {
     if (isLoaded && socket) {
-      if (socket.readyState === 1) {
-        // subscribe to admin channel events
-        socket.send(
-          JSON.stringify({
-            action: "subscribe",
-            channel: "admin",
-            event_id: "northeastern2024",
-          })
-        );
+      if (socket.readyState < 2) {
+        if (socket.readyState === 0) {
+          // socket still opening connection, need to wait to subscribe until open
+          socket.onopen = () => {
+            // subscribe to admin channel events
+            socket.send(
+              JSON.stringify({
+                action: "subscribe",
+                channel: "admin",
+                event_id: "northeastern2024",
+              })
+            );
+          };
+        } else {
+          // socket already open by now, subscribe to admin channel events
+          socket.send(
+            JSON.stringify({
+              action: "subscribe",
+              channel: "admin",
+              event_id: "northeastern2024",
+            })
+          );
+        }
 
         // restart the connection on disconnect
         const onDisconnect = () => {
@@ -114,6 +128,7 @@ function NewAdmin() {
         socket.onmessage = onMessage;
         socket.onerror = onError;
       } else {
+        console.log(socket.readyState);
         // socket is not ready, prompt for refresh
         setError("Connection error, please refresh the page.");
       }
@@ -144,7 +159,13 @@ function NewAdmin() {
       openVolumeControlDialog.id,
       newVolume
     ).then(
-      (resp) => {},
+      (resp) => {
+        if (resp.status !== 200) {
+          console.error(resp.message);
+          setError("An error ocurred updating the volume.");
+        }
+        // TODO: ideally reset original volume, but need setter
+      },
       (err) => {
         console.error(err);
         setError("An error ocurred updating the volume.");
