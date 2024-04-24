@@ -96,6 +96,7 @@ provider:
     WS_CALLBACK_URL: ${self:custom.websocketCallbackUrl.${opt:stage, self:provider.stage}}
     APP_STAGE: ${sls:stage}
     APP_REGION: ${opt:region, self:provider.region}
+    ADMIN_ACCESS_CODE: ${ssm:event-media-control-admin-access-code}
   httpApi:
     metrics: true
     cors: true
@@ -163,6 +164,21 @@ functions:
       - httpApi: "PUT /v1/playback/{eventId}/screens/{screenId}/volume"
       - httpApi: "PUT /v1/playback/{eventId}/screens/{screenId}/mute"
       - httpApi: "PUT /v1/playback/{eventId}/screens/{screenId}/unmute"
+    # role:
+  scheduleHandler:
+    memorySize: 512
+    timeout: 10
+    # override runtime
+    runtime: python3.9
+    name: event-media-control-schedule-handler-${sls:stage}
+    description: "Handler for executing scheduled screen changes"
+    handler: tools/scheduler.handler
+    events:
+      - schedule:
+          # can't use rate because can't specify to start on even cadence
+          # every 5 minutes, hours 8am-11pm EST, April and May 2024
+          rate: cron(0/5 0-3,12-23 ? 4-5 * 2024)
+          enabled: true
     # role:
 
   # websocket handlers
