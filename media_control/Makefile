@@ -19,9 +19,9 @@ copy-html:
 
 # make event=northeastern2024 sync-static
 sync-static:
-	aws s3 sync frontend/html/ s3://static.jaminproductions.com/emc/events/$(event)/html/
+	aws s3 sync frontend/html/ s3://static.jaminproductions.com/emc/events/northeastern2024/html/
 	aws s3 sync frontend/js/ s3://static.jaminproductions.com/emc/scripts/
-	aws cloudfront create-invalidation --distribution-id ${staticcloudfront.id} --paths /emc/scripts/* /emc/events/$(event)/html/*
+	aws cloudfront create-invalidation --distribution-id ${staticcloudfront.id} --paths /emc/scripts/* /emc/events/northeastern2024/html/*
 
 ssh:
 	ssh -i emc_key.pem ec2-user@${ec2.id}.compute-1.amazonaws.com
