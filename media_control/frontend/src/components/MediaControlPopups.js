@@ -15,6 +15,7 @@ import Slider from "@mui/material/Slider";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import Typography from "@mui/material/Typography";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export const ChooseMediaPopupDialog = ({
   screen,
@@ -84,6 +85,7 @@ export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
   const [volume, setVolume] = useState(
     parseInt(screen.current_playback_volume)
   );
+  const [loading, setLoading] = useState(false);
 
   const handleVolumeChange = (event, newVolume) => {
     event.preventDefault();
@@ -91,15 +93,22 @@ export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
     setVolume(newVolume);
   };
 
+  // handle when the screen updates with new playback volume
   useEffect(() => {
     setVolume(parseInt(screen.current_playback_volume));
+    setLoading(false);
   }, [screen.current_playback_volume]);
+
+  const handleVolumeChangeCommitted = () => {
+    handleSubmit(volume);
+    setLoading(true);
+  };
 
   return (
     <Dialog onClose={handleClose} open={!!screen}>
       <DialogTitle>
         <Typography variant="body2" color="text.secondary">
-          Playback volume
+          Music volume
         </Typography>
       </DialogTitle>
       <DialogContent>
@@ -112,13 +121,14 @@ export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
               aria-label="Volume"
               value={volume}
               onChange={handleVolumeChange}
-              onChangeCommitted={() => handleSubmit(volume)}
+              onChangeCommitted={handleVolumeChangeCommitted}
             />
             <VolumeUpIcon />
           </Stack>
         </Box>
       </DialogContent>
       <DialogActions sx={{ marginTop: -3 }}>
+        {loading && <CircularProgress size={25} />}
         <Button onClick={handleClose}>Close</Button>
       </DialogActions>
     </Dialog>

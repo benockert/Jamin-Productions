@@ -9,6 +9,9 @@ import Typography from "@mui/material/Typography";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import IconButton from "@mui/material/IconButton";
+import CastConnectedIcon from "@mui/icons-material/CastConnected";
+import WebAssetOffIcon from "@mui/icons-material/WebAssetOff";
+import Chip from "@mui/material/Chip";
 import { styled } from "@mui/system";
 
 const Item = styled(Card)(({ theme }) => ({
@@ -20,7 +23,26 @@ const Item = styled(Card)(({ theme }) => ({
   borderStyle: "solid",
   borderWeight: 2,
   borderColor: theme.palette.secondary.main,
+  boxShadow: "1px 2px 20px 5px rgba(50, 50, 50) !important",
 }));
+
+const NextChip = styled(Chip)(({ theme }) => ({
+  outline: "2px solid",
+  outlineColor: theme.palette.primary.secondary,
+  backgroundColor: theme.palette.primary.main,
+  paddingLeft: 5,
+  ".MuiChip-icon": {
+    color: theme.palette.secondary.main,
+  },
+  fontSize: "13px",
+}));
+
+const formatTimestamp = (timstampString) => {
+  const date = new Date(parseInt(timstampString)).toLocaleTimeString();
+  return `${date.slice(0, date.lastIndexOf(":"))}${date.slice(
+    date.lastIndexOf(":") + 4
+  )}`;
+};
 
 const ActiveScreen = ({
   screen,
@@ -29,7 +51,16 @@ const ActiveScreen = ({
   onVolumeClickCallback,
 }) => {
   return (
-    <Grid item xs={10} sm={9} md={8} lg={7} xl={6} key={`screen_${screen.id}`}>
+    <Grid
+      item
+      xs={10}
+      sm={9}
+      md={8}
+      lg={7}
+      xl={6}
+      key={`screen_${screen.id}`}
+      sx={{ position: "relative" }}
+    >
       <Card component={Item}>
         <CardMedia
           component="img"
@@ -67,6 +98,27 @@ const ActiveScreen = ({
           )}
         </CardActions>
       </Card>
+      {/* position schedule chip at top left of card media */}
+      <Typography
+        variant="h3"
+        component="div"
+        style={{ position: "absolute", left: 10, top: 10 }}
+      >
+        {screen.next_scheduled_change ? (
+          <NextChip
+            icon={<CastConnectedIcon />}
+            label={`Next: ${
+              allMedia[`media.${screen.next_media_id}`]?.short_name
+            } at ${formatTimestamp(screen.next_scheduled_change)}
+                   `}
+          />
+        ) : (
+          <NextChip
+            icon={<WebAssetOffIcon />}
+            label="Screen is not scheduled"
+          />
+        )}
+      </Typography>
     </Grid>
   );
 };
