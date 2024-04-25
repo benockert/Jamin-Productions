@@ -1,8 +1,0 @@
-{
-        "script": "./src/index.js",
-        "watch": true,
-        "ignore_watch": ["node_modules", "package.json"],
-        "name": "emc-backend",
-        "time": true,
-        "watch_delay": 15000
-}
