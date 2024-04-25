@@ -2,7 +2,7 @@ import React from "react";
 import Dashboard from "./pages/Dashboard.js";
 import Login from "./pages/Login.js";
 import RequireAuth from "./components/RequireAuth.js";
-import NewAdmin from "./pages/NewAdmin.js";
+import Admin from "./pages/Admin.js";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -23,7 +23,7 @@ function App() {
           exact
           element={
             <RequireAuth>
-              <NewAdmin />
+              <Admin />
             </RequireAuth>
           }
         />

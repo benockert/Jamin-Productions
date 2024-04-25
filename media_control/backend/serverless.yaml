@@ -173,12 +173,15 @@ functions:
     name: event-media-control-schedule-handler-${sls:stage}
     description: "Handler for executing scheduled screen changes"
     handler: tools/scheduler.handler
+    layers:
+      # add custom layer with Python requests library
+      - arn:aws:lambda:us-east-1:783358359740:layer:requests_layer:1
     events:
       - schedule:
           # can't use rate because can't specify to start on even cadence
           # every 5 minutes, hours 8am-11pm EST, April and May 2024
           rate: cron(0/5 0-3,12-23 ? 4-5 * 2024)
-          enabled: true
+          enabled: false
     # role:
 
   # websocket handlers
