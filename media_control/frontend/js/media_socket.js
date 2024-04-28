@@ -1,7 +1,5 @@
 const setupSocket = (eventId, screenId, mediaId) => {
-  let socket = new WebSocket(
-    "wss://7u2mqu2n2i.execute-api.us-east-1.amazonaws.com/dev"
-  );
+  let socket = new WebSocket("wss://ws.event-media-control.com");
 
   // Connection opened
   socket.onopen = () => {

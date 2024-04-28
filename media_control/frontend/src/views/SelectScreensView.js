@@ -25,7 +25,7 @@ const Item = styled(Card)(({ theme }) => ({
 
 // todo update to const
 const SelectScreensView = ({ screens, redirectPageCallback }) => {
-  if (screens) {
+  if (Object.keys(screens).length > 0) {
     return (
       <>
         {Array.from(screens).map((screen, idx) => {
@@ -74,7 +74,15 @@ const SelectScreensView = ({ screens, redirectPageCallback }) => {
       </>
     );
   } else {
-    return <div></div>;
+    return (
+      <Typography
+        variant="body1"
+        component="div"
+        sx={{ color: "secondary.main", fontStyle: "italic" }}
+      >
+        There are no screens for this event.
+      </Typography>
+    );
   }
 };
 

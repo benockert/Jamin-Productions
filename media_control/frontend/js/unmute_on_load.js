@@ -1,6 +1,6 @@
 const unmute = async (eventId, screenId) => {
   const response = await fetch(
-    `https://olrk6aszw4.execute-api.us-east-1.amazonaws.com/v1/playback/${eventId}/screens/${screenId}/unmute`,
+    `https://api.event-media-control.com/v1/playback/${eventId}/screens/${screenId}/unmute`,
     {
       method: "PUT",
     }

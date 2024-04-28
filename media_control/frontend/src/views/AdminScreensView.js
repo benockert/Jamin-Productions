@@ -150,7 +150,7 @@ const AdminScreensView = ({
   openChoseMediaDialog,
   openVolumeControlDialog,
 }) => {
-  return screens ? (
+  return Object.keys(screens).length > 0 ? (
     <>
       {Array.from(Object.values(screens)).map((screen, idx) => {
         return screen.current_media_id ? (
@@ -167,7 +167,11 @@ const AdminScreensView = ({
       })}
     </>
   ) : (
-    <Typography gutterBottom variant="h5" component="div">
+    <Typography
+      variant="body1"
+      component="div"
+      sx={{ color: "secondary.main", fontStyle: "italic" }}
+    >
       There are no screens for this event.
     </Typography>
   );

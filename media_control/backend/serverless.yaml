@@ -17,10 +17,6 @@ custom:
   domainName: "event-media-control.com"
   jaminProductionsApi: https://api.jaminproductions.com
 
-  # NOTE: will need to update this in case of a stack recreation
-  websocketCallbackUrl:
-    dev: 7u2mqu2n2i.execute-api.us-east-1.amazonaws.com/dev
-
   # for routing 53 domain and latency routing
   customDomainsEnabled:
     dev: false
@@ -28,6 +24,7 @@ custom:
   certificateName: ${self:custom.domainName}
   regionalApiDomain: api-${opt:region, self:provider.region}.${self:custom.domainName}
   apiDomain: api.${self:custom.domainName}
+  wsDomain: ws.${self:custom.domainName}
   customDomains:
     # api.event-media-control.com/{stage}
     - http:
@@ -53,6 +50,20 @@ custom:
           routingPolicy: latency
         autoDomain: true
         enabled: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
+    - websocket:
+        certificateName: "${self:custom.domainName}"
+        domainName: "${self:custom.wsDomain}"
+        basePath: ""
+        endpointType: "regional"
+        createRoute53Record: true
+        securityPolicy: tls_1_2
+        autoDomain: true
+        enabled: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
+
+  # NOTE: will need to update this in case of a stack recreation
+  websocketCallbackUrl:
+    dev: 7u2mqu2n2i.execute-api.us-east-1.amazonaws.com/dev
+    prod: ${self:custom.wsDomain}
 
 provider:
   name: aws
@@ -101,7 +112,7 @@ provider:
     metrics: true
     cors: true
     disableDefaultEndpoint: ${self:custom.customDomainsEnabled.${opt:stage, self:provider.stage}}
-  websocketsApiName: event-media-control-ws-api
+  websocketsApiName: event-media-control-ws-api-${sls:stage}
   websocketsApiRouteSelectionExpression: $request.body.action
   websocketsDescription: Websockets for realtime updates to screens
 

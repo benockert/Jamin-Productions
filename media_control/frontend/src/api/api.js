@@ -4,7 +4,7 @@ export const API_HOST =
     : "https://olrk6aszw4.execute-api.us-east-1.amazonaws.com";
 export const SOCKET_HOST =
   process.env.NODE_ENV === "production"
-    ? "http://44.198.176.45:5002"
+    ? "wss://ws.event-media-control.com"
     : "wss://7u2mqu2n2i.execute-api.us-east-1.amazonaws.com/dev";
 
 async function api_get(path, token) {

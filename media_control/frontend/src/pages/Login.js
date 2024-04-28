@@ -86,7 +86,7 @@ function Login() {
             <Avatar
               sx={{ width: 90, height: "auto" }}
               variant="square"
-              src={`https://static.jaminproductions.com/dev/media_control/assets/${domain.currentTarget}.png`}
+              src={`https://static.jaminproductions.com/dev/media_control/assets/${domain.current}.png`}
             ></Avatar>
             <Divider orientation="vertical" flexItem />
             <Box>
