@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Livestream</title>
+    <!-- include a external favicon redirect to prevent /favicon.ico calls to API -->
+    <link rel="icon" href="https://media.jaminproductions.com/favicon.ico" />
+  </head>
+  <script src="https://static.jaminproductions.com/prod/media_control/scripts/media_socket.js"></script>
+  <script src="https://static.jaminproductions.com/prod/media_control/scripts/mute_on_load.js"></script>
+  <script
+    type="text/javascript"
+    data-embed_id="ls_embed_1714218165"
+    src="https://livestream.com/assets/plugins/referrer_tracking.js"
+  ></script>
+  <body>
+    <style>
+      body {
+        margin: 0px;
+      }
+      div {
+        margin-left: auto;
+        margin-right: auto;
+        display: table;
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        padding-top: 56.25%;
+      }
+      iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      .qr {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        height: 35%;
+        width: auto;
+        z-index: 100;
+        /* border: 5px solid black; */
+      }
+    </style>
+    <body>
+      <div className="container">
+        <iframe
+          className="responsive-iframe"
+          title="livestream"
+          id="ls_embed_1714218165"
+          src="https://livestream.com/accounts/9010826/events/11141306/player?width=1920&amp;height=1080&amp;enableInfoAndActivity=true&amp;defaultDrawer=&amp;autoPlay=true&amp;mute=false&amp;fullscreen=true"
+          width="1920"
+          height="1080"
+          frameborder="0"
+          scrolling="no"
+          autoPlay
+          allow="autoplay;"
+          allowfullscreen
+        >
+        </iframe>
+        <img
+          class="qr"
+          src="https://static.jaminproductions.com/prod/media_control/events/northeastern2024/images/qr_with_view_program_message.png"
+          alt=""
+        />
+      </div>
+    </body>
+  </body>
+</html>

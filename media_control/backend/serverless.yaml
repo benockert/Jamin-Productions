@@ -192,7 +192,7 @@ functions:
           # can't use rate because can't specify to start on even cadence
           # every 5 minutes, hours 8am-11pm EST, April and May 2024
           rate: cron(0/5 0-3,12-23 ? 4-5 * 2024)
-          enabled: false
+          enabled: true
     # role:
 
   # websocket handlers

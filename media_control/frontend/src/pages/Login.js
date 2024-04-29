@@ -14,6 +14,7 @@ import Alert from "@mui/material/Alert";
 import Snackbar from "@mui/material/Snackbar";
 import { get_session } from "../api/api.js";
 import { useNavigate } from "react-router-dom";
+import { IS_PROD } from "../config/config.js";
 
 function Login() {
   let navigate = useNavigate();
@@ -86,7 +87,9 @@ function Login() {
             <Avatar
               sx={{ width: 90, height: "auto" }}
               variant="square"
-              src={`https://static.jaminproductions.com/dev/media_control/assets/${domain.current}.png`}
+              src={`https://static.jaminproductions.com/${
+                IS_PROD ? "prod" : "dev"
+              }/media_control/images/${domain.current}.png`}
             ></Avatar>
             <Divider orientation="vertical" flexItem />
             <Box>

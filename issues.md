@@ -6,6 +6,8 @@
    - added Lambda::Permission which enabled S3 to invoke Lambda
 1. `Unable to get object metadata from S3. Check object key, region and/or access permissions.`
    - s3-object-lambda:\* permissions to Lambda execution role
+1. `DNS_PROBE_FINISHED_NXDOMAIN`
+   - needed to update name servers in registered domain and hosted zone to match
 
 ## Need-to-solve Issues
 

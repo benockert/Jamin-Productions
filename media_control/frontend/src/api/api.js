@@ -1,11 +1,10 @@
-export const API_HOST =
-  process.env.NODE_ENV === "production"
-    ? "https://api.event-media-control.com"
-    : "https://olrk6aszw4.execute-api.us-east-1.amazonaws.com";
-export const SOCKET_HOST =
-  process.env.NODE_ENV === "production"
-    ? "wss://ws.event-media-control.com"
-    : "wss://7u2mqu2n2i.execute-api.us-east-1.amazonaws.com/dev";
+import { IS_PROD } from "../config/config";
+export const API_HOST = IS_PROD
+  ? "https://api.event-media-control.com"
+  : "https://olrk6aszw4.execute-api.us-east-1.amazonaws.com";
+export const SOCKET_HOST = IS_PROD
+  ? "wss://ws.event-media-control.com"
+  : "wss://7u2mqu2n2i.execute-api.us-east-1.amazonaws.com/dev";
 
 async function api_get(path, token) {
   const req = {

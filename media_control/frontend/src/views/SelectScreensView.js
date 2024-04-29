@@ -4,6 +4,8 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import CardMedia from "@mui/material/CardMedia";
 import Typography from "@mui/material/Typography";
+import PreviewIcon from "@mui/icons-material/Preview";
+import { ScreenInfoChip } from "../theme/custom";
 import { CardActionArea } from "@mui/material";
 import { styled } from "@mui/system";
 
@@ -24,7 +26,7 @@ const Item = styled(Card)(({ theme }) => ({
 }));
 
 // todo update to const
-const SelectScreensView = ({ screens, redirectPageCallback }) => {
+const SelectScreensView = ({ screens, media, redirectPageCallback }) => {
   if (Object.keys(screens).length > 0) {
     return (
       <>
@@ -38,6 +40,7 @@ const SelectScreensView = ({ screens, redirectPageCallback }) => {
               lg={7}
               xl={6}
               key={`screen_${idx}`}
+              sx={{ position: "relative" }}
             >
               <Card component={Item}>
                 <CardActionArea
@@ -62,12 +65,35 @@ const SelectScreensView = ({ screens, redirectPageCallback }) => {
                     <Typography variant="body2" color="text.secondary">
                       {screen.description}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      <b>Media:</b> {screen.default_media_id}
-                    </Typography>
                   </CardContent>
                 </CardActionArea>
               </Card>
+              {/* display current media info at top left of card */}
+              <Typography
+                variant="h3"
+                component="div"
+                style={{ position: "absolute", left: 10, top: 10 }}
+              >
+                {screen.current_media_id ? (
+                  <ScreenInfoChip
+                    icon={<PreviewIcon />}
+                    label={`Current: ${
+                      media[`media.${screen.current_media_id}`]?.short_name
+                    }
+                   `}
+                  />
+                ) : screen.default_media_id ? (
+                  <ScreenInfoChip
+                    icon={<PreviewIcon />}
+                    label={`Current: ${
+                      media[`media.${screen.default_media_id}`]?.short_name
+                    }
+                   `}
+                  />
+                ) : (
+                  <></>
+                )}
+              </Typography>
             </Grid>
           );
         })}

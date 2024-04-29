@@ -22,7 +22,8 @@ custom:
   stackName: "jamin-productions-api-backend-stack-${sls:stage}"
   staticBucketName: "static.jaminproductions.com"
   staticBucketRegion: "us-east-1"
-  spotifyAppName: "Jamin Productions"
+  # spotifyAppName: "Jamin Productions"
+  spotifyAppName: "Event Media Control"
 
   # for route 53 domain and latency routing
   customDomainsEnabled:
@@ -98,8 +99,10 @@ provider:
     INTERACTIVE_MEDIA_TABLE: ${self:custom.interactiveMediaTableName}
     SPOTIFY_APP_NAME: ${self:custom.spotifyAppName}
     SPOTIFY_AUTH_TABLE: ${self:custom.spotifyAuthTableName}
-    SPOTIFY_CLIENT_ID: ${ssm:jamin-productions-spotify-app-client-id}
-    SPOTIFY_CLIENT_SECRET: ${ssm:jamin-productions-spotify-app-client-secret}
+    # SPOTIFY_CLIENT_ID: ${ssm:jamin-productions-spotify-app-client-id}
+    # SPOTIFY_CLIENT_SECRET: ${ssm:jamin-productions-spotify-app-client-secret}
+    SPOTIFY_CLIENT_ID: ${ssm:event-media-control-client-id}
+    SPOTIFY_CLIENT_SECRET: ${ssm:event-media-control-client-secret}
     STATIC_CONTENT_BUCKET: ${self:custom.staticBucketName}
     STATIC_BUCKET_REGION: ${self:custom.staticBucketRegion}
     UPLOAD_URL_EXPIRATION_SECONDS: 60
