@@ -62,6 +62,11 @@ export const dashboardTheme = createTheme({
       fontSize: 16,
       fontWeight: "600",
     },
+    body3: {
+      fontFamily: ["Red Hat Text", "sans-serif"].join(","),
+      fontSize: 15,
+      fontWeight: "100",
+    },
   },
   breakpoints: {
     values: {

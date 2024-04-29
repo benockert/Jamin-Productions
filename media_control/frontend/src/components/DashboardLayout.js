@@ -49,7 +49,7 @@ function DashboardLayout({ title, event, error, toggleError, children }) {
           sx={{
             backgroundColor: "background.default",
             maxHeight: "100vh",
-            overflow: "auto",
+            overflowX: "hidden",
             "::-webkit-scrollbar": { display: "none" },
           }}
         >

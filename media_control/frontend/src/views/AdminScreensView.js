@@ -62,6 +62,9 @@ const ActiveScreen = ({
           <Typography variant="h5" component="div">
             {screen.name}
           </Typography>
+          <Typography variant="body3" component="div">
+            {allMedia[`media.${screen.current_media_id}`]?.name}
+          </Typography>
         </CardContent>
         <CardActions>
           <Button
