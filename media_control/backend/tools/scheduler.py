@@ -108,7 +108,7 @@ def handler(event, context):
             for schedule_change in schedule_changes_to_execute:
                 response = execute(schedule_change, token)
                 if response["message"] == "Unauthorized":
-                    logging.error("Unauthorized")
+                    print("Unauthorized")
                     return {
                         'statusCode': 403,
                         'body': json.dumps('Unauthorized')

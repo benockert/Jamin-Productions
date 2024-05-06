@@ -4,6 +4,7 @@ import boto3
 from pprint import pprint
 from datetime import datetime
 import math
+import sys
 
 dynamodb = boto3.client('dynamodb')
 
@@ -14,10 +15,9 @@ def date_to_timestamp(date, format=""):
 
     return timestamp
 
-def batch_write_to_ddb(items):
-    table_name = "event-media-control-prod"
+def batch_write_to_ddb(items, table):
     request_items = {}
-    request_items[table_name] = items
+    request_items[table] = items
     pprint(request_items)
 
     result = dynamodb.batch_write_item(
@@ -25,7 +25,7 @@ def batch_write_to_ddb(items):
     )
     print(result)
     
-def main(filename):
+def main(filename, stack):
     f = open(filename)
     data = json.load(f)
 
@@ -76,6 +76,7 @@ def main(filename):
             changes_at_time.append({"M": item})
             events[scheduled_time] = changes_at_time
 
+    table_name = f"event-media-control-{stack}"
     items_to_write = []
     for scheduled_time, events in events.items():
         items_to_write.append({
@@ -86,14 +87,14 @@ def main(filename):
         
         # can only write 25 per batch
         if len(items_to_write) >= 25:
-            batch_write_to_ddb(items_to_write)
+            batch_write_to_ddb(items_to_write, table_name)
 
             # reset items list
             items_to_write = []
     
     # write remaining items in final batch
     if len(items_to_write):
-        batch_write_to_ddb(items_to_write)
+        batch_write_to_ddb(items_to_write, table_name)
         items_to_write = []   
 
     assert(len(items_to_write) == 0)
@@ -101,7 +102,10 @@ def main(filename):
     f.close()
 
 
+# Usage: python write_schedule_to_ddb.py [dev|prod] {event_id} 
 if __name__ == "__main__":
-    filename = "northeastern2024.json"
+    stack = sys.argv[1] if len(sys.argv) else "dev"
+    event_id = sys.argv[2]
+    filename = f"{event_id}.json"
     print(f"Processing scheduled events in {filename}")
-    main(filename)
+    main(filename, stack)

@@ -92,7 +92,7 @@ function Admin() {
               JSON.stringify({
                 action: "subscribe",
                 channel: "admin",
-                event_id: "northeastern2024",
+                event_id: event.id,
               })
             );
           };
@@ -102,7 +102,7 @@ function Admin() {
             JSON.stringify({
               action: "subscribe",
               channel: "admin",
-              event_id: "northeastern2024",
+              event_id: event.id,
             })
           );
         }
