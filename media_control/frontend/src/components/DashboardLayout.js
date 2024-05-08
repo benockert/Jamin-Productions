@@ -108,9 +108,14 @@ function DashboardLayout({ title, event, error, toggleError, children }) {
           }}
           sx={{
             minWidth: "25%",
+            padding: 1,
           }}
         >
-          <Alert variant="filled" severity="error" sx={{ width: "100%" }}>
+          <Alert
+            variant="filled"
+            severity="error"
+            sx={{ width: "100%", fontSize: 16 }}
+          >
             {error}
           </Alert>
         </Snackbar>

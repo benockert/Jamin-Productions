@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -87,9 +88,10 @@ export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
   );
   const [loading, setLoading] = useState(false);
 
+  const iconSize = 25;
+
   const handleVolumeChange = (event, newVolume) => {
     event.preventDefault();
-    // TODO: errored on 0
     setVolume(newVolume);
   };
 
@@ -99,9 +101,25 @@ export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
     setLoading(false);
   }, [screen.current_playback_volume]);
 
-  const handleVolumeChangeCommitted = () => {
-    handleSubmit(volume);
+  const changeVolume = async (newVolume) => {
     setLoading(true);
+    const success = await handleSubmit(newVolume);
+    if (!success) {
+      // reset on error
+      setVolume(parseInt(screen.current_playback_volume));
+      setLoading(false);
+    }
+  };
+
+  const handleVolumeChangeCommitted = async () => {
+    await changeVolume(volume);
+  };
+
+  const handleVolumePresetClick = async (event) => {
+    event.preventDefault();
+    const newVolume = parseInt(event.target.innerText, 0);
+    setVolume(newVolume);
+    await changeVolume(newVolume);
   };
 
   return (
@@ -111,25 +129,45 @@ export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
           Music volume
         </Typography>
       </DialogTitle>
-      <DialogContent>
-        <Box sx={{ width: 200, padding: 1 }}>
-          <Stack spacing={2} direction="row" sx={{ mb: 1 }} alignItems="center">
-            <VolumeOffIcon />
-            <Slider
-              min={0}
-              max={100}
-              aria-label="Volume"
-              value={volume}
-              onChange={handleVolumeChange}
-              onChangeCommitted={handleVolumeChangeCommitted}
-            />
-            <VolumeUpIcon />
-          </Stack>
-        </Box>
+      <DialogContent sx={{ mb: -1 }}>
+        <Stack alignItems="center">
+          <Box sx={{ width: 250, padding: 1 }}>
+            <Stack
+              spacing={2}
+              direction="row"
+              sx={{ mb: 2, width: "100%" }}
+              alignItems="center"
+            >
+              <VolumeOffIcon sx={{ fontSize: iconSize }} />
+              <Slider
+                min={0}
+                max={100}
+                aria-label="Volume"
+                value={volume}
+                onChange={handleVolumeChange}
+                onChangeCommitted={handleVolumeChangeCommitted}
+              />
+              <VolumeUpIcon sx={{ fontSize: iconSize }} />
+            </Stack>
+          </Box>
+          <ButtonGroup
+            sx={{ height: 38, maxHeight: 38, width: "90%", maxWidth: "90%" }}
+            variant="outlined"
+            aria-label="Preset volume buttons"
+          >
+            <Button onClick={handleVolumePresetClick}>0</Button>
+            <Button onClick={handleVolumePresetClick}>25</Button>
+            <Button onClick={handleVolumePresetClick}>50</Button>
+            <Button onClick={handleVolumePresetClick}>75</Button>
+            <Button onClick={handleVolumePresetClick}>100</Button>
+          </ButtonGroup>
+        </Stack>
       </DialogContent>
-      <DialogActions sx={{ marginTop: -3 }}>
-        {loading && <CircularProgress size={25} />}
-        <Button onClick={handleClose}>Close</Button>
+      <DialogActions>
+        {loading && <CircularProgress size={iconSize} />}
+        <Button sx={{ fontSize: 16 }} onClick={handleClose}>
+          Close
+        </Button>
       </DialogActions>
     </Dialog>
   );

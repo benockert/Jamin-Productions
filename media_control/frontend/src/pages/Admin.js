@@ -128,7 +128,6 @@ function Admin() {
         socket.onmessage = onMessage;
         socket.onerror = onError;
       } else {
-        console.log(socket.readyState);
         // socket is not ready, prompt for refresh
         setError("Connection error, please refresh the page.");
       }
@@ -152,8 +151,9 @@ function Admin() {
     setOpenChooseMediaDialog(false);
   };
 
+  // returns whether the operation was successful or not
   const onVolumeChangeCommitted = (newVolume) => {
-    set_playback_volume(
+    return set_playback_volume(
       token.current,
       openVolumeControlDialog.event_id,
       openVolumeControlDialog.id,
@@ -161,14 +161,20 @@ function Admin() {
     ).then(
       (resp) => {
         if (resp.status !== 200) {
-          console.error(resp.message);
-          setError("An error ocurred updating the volume.");
+          if (resp.status === 404) {
+            setError("An error ocurred updating the volume: NO_ACTIVE_DEVICE");
+          } else {
+            setError("An error ocurred updating the volume:");
+          }
+          return false;
+        } else {
+          return true;
         }
-        // TODO: ideally reset original volume, but need setter
       },
       (err) => {
         console.error(err);
         setError("An error ocurred updating the volume.");
+        return false;
       }
     );
   };
