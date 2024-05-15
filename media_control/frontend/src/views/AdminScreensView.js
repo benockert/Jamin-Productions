@@ -97,7 +97,7 @@ const ActiveScreen = ({
         component="div"
         style={{ position: "absolute", left: 10, top: 10 }}
       >
-        {screen.next_scheduled_change ? (
+        {screen.next_scheduled_change && screen.next_media_id ? (
           <ScreenInfoChip
             icon={<ConnectedTvIcon />}
             label={`Next: ${

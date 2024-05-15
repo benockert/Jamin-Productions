@@ -7,8 +7,8 @@ sync-static-dev:
 	aws cloudfront create-invalidation --distribution-id ${staticcloudfront.id} --paths /dev/media_control/scripts/* /dev/media_control/events/northeastern2024/html/*
 
 sync-static-prod:
-	aws s3 sync frontend/html/prod/ s3://static.jaminproductions.com/prod/media_control/events/northeastern2024/html/
-	aws s3 sync frontend/js/prod/ s3://static.jaminproductions.com/prod/media_control/scripts/
+	aws s3 sync events/northeastern2024/html/ s3://static.jaminproductions.com/prod/media_control/events/northeastern2024/html/
+	aws s3 sync scripts/js/ s3://static.jaminproductions.com/prod/media_control/scripts/
 	aws cloudfront create-invalidation --distribution-id ${staticcloudfront.id} --paths /prod/media_control/scripts/* /prod/media_control/events/northeastern2024/html/*
 
 deploy-emc-site-stack:

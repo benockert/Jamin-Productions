@@ -15,8 +15,6 @@ module.exports.getEvent = async (eventId, eventType) => {
     new GetCommand(eventPrimaryParms)
   );
   if (primary) {
-    const { name, date, brand_color } = primary;
-
     if (eventType) {
       // get secondary event information based on type
       const secondaryEventParams = {
@@ -29,7 +27,7 @@ module.exports.getEvent = async (eventId, eventType) => {
         new GetCommand(secondaryEventParams)
       );
       if (secondary) {
-        return { status: 200, name, date, brand_color, ...secondary };
+        return { status: 200, ...primary, ...secondary };
       } else {
         return {
           status: 404,
@@ -39,7 +37,7 @@ module.exports.getEvent = async (eventId, eventType) => {
       }
     } else {
       console.log("No type specified");
-      return { status: 200, name, date };
+      return { status: 200, ...primary };
     }
   } else {
     return {

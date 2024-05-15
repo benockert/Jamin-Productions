@@ -112,14 +112,14 @@ export const VolumeSliderPopup = ({ screen, handleClose, handleSubmit }) => {
   };
 
   const handleVolumeChangeCommitted = async () => {
-    await changeVolume(volume);
+    changeVolume(volume);
   };
 
   const handleVolumePresetClick = async (event) => {
     event.preventDefault();
     const newVolume = parseInt(event.target.innerText, 0);
     setVolume(newVolume);
-    await changeVolume(newVolume);
+    changeVolume(newVolume);
   };
 
   return (
